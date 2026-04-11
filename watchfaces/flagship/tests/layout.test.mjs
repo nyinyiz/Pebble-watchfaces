@@ -1,7 +1,7 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
+import test from 'node:test';
+import assert from 'node:assert/strict';
 
-const { buildLayout } = require('../src/rocky/lib/layout');
+import { buildLayout } from '../src/common/layout.mjs';
 
 test('buildLayout centers the time block on rectangular screens', () => {
   const layout = buildLayout({ width: 200, height: 228, isRound: false });

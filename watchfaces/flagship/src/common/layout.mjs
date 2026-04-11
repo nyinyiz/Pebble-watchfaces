@@ -1,4 +1,4 @@
-function buildLayout(bounds) {
+export function buildLayout(bounds) {
   const centerX = Math.round(bounds.width / 2);
 
   if (bounds.isRound) {
@@ -17,7 +17,3 @@ function buildLayout(bounds) {
     statusRight: { x: bounds.width - 34, y: 176 }
   };
 }
-
-module.exports = {
-  buildLayout
-};

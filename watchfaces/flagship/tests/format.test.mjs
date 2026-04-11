@@ -1,12 +1,12 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
+import test from 'node:test';
+import assert from 'node:assert/strict';
 
-const {
+import {
   formatTime,
   formatDate,
   formatBattery,
   formatConnection
-} = require('../src/rocky/lib/format');
+} from '../src/common/format.mjs';
 
 test('formatTime renders 24-hour time without leading hour zero', () => {
   const date = new Date('2026-04-11T09:05:00');
