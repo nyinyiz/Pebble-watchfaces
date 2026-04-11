@@ -1,9 +1,5 @@
 import { formatBattery, formatConnection, formatDate, formatTime } from './format.mjs';
 
-function pad2(n) {
-  return String(n).padStart(2, '0');
-}
-
 function getAccentName(hours) {
   if (hours < 6) {
     return 'night';
@@ -47,7 +43,7 @@ export function buildFaceModel(state) {
       text: batteryText
     },
     statusCenter: {
-      text: `SEC ${pad2(state.date.getSeconds())}`
+      text: `SEC ${String(state.date.getSeconds()).padStart(2, '0')}`
     },
     statusRight: {
       text: formatConnection(state.isConnected)

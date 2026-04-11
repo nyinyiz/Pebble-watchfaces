@@ -4,9 +4,7 @@ const BAND_OFFSETS = [0.2, 1.1, 2.4];
 
 export function buildAnimationState({ date, width, isRound }) {
   const seconds = date.getSeconds();
-  const milliseconds = typeof date.getMilliseconds === 'function'
-    ? date.getMilliseconds()
-    : 0;
+  const milliseconds = date.getMilliseconds?.() ?? 0;
   const secondProgress = ((seconds * 1000) + milliseconds) / 60000;
   const sweepInset = isRound ? 40 : 12;
   const sweepHalfWidth = isRound ? 9 : 7;

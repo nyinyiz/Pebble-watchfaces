@@ -1,4 +1,5 @@
 import Poco from "commodetto/Poco";
+import { buildAnimationState } from "animation";
 
 const render = new Poco(screen);
 
@@ -35,10 +36,6 @@ const C_NIGHT = render.makeColor(128, 168, 245);  // cool violet 18:00–05:59
 const W        = render.width;
 const H        = render.height;
 const IS_ROUND = W === H;
-const TWO_PI = Math.PI * 2;
-const BAND_MULTIPLIERS = [0.85, 1.25, 1.65];
-const BAND_OFFSETS = [0.2, 1.1, 2.4];
-
 /* ─── Star field ─────────────────────────────────────────────────────────── */
 // Positions in the aurora / sky zone (Y 5–65 — above the mountain line).
 // Deliberately kept above Y=65 so most stars are not hidden by mountains.
@@ -133,13 +130,6 @@ function accentFor(hours) {
   return C_DAY;
 }
 
-function accentForName(name, hours) {
-  if (name === "morning") return C_DAWN;
-  if (name === "day") return C_DAY;
-  if (name === "night") return C_NIGHT;
-  return accentFor(hours);
-}
-
 function buildLayout(bounds) {
   const centerX = Math.round(bounds.width / 2);
 
@@ -163,32 +153,6 @@ function buildLayout(bounds) {
     statusLeft: { x: 34, y: 176 },
     statusCenter: { x: centerX, y: 176 },
     statusRight: { x: bounds.width - 34, y: 176 }
-  };
-}
-
-function buildAnimationState({ date, width, isRound }) {
-  const seconds = date.getSeconds();
-  const milliseconds = typeof date.getMilliseconds === "function"
-    ? date.getMilliseconds()
-    : 0;
-  const secondProgress = ((seconds * 1000) + milliseconds) / 60000;
-  const sweepInset = isRound ? 40 : 12;
-  const sweepHalfWidth = isRound ? 9 : 7;
-  const trackWidth = Math.max(0, width - (sweepInset * 2));
-  const sweepX = sweepInset + Math.round(trackWidth * secondProgress);
-  const bandPhases = BAND_MULTIPLIERS.map((multiplier, index) => {
-    const raw = (secondProgress * TWO_PI * multiplier) + BAND_OFFSETS[index];
-    return raw % TWO_PI;
-  });
-
-  return {
-    secondProgress,
-    sweepInset,
-    sweepHalfWidth,
-    sweepX,
-    bandPhases,
-    twinkleOffset: seconds % 5,
-    pulse: Math.sin(secondProgress * TWO_PI)
   };
 }
 
@@ -327,7 +291,7 @@ function draw(event) {
     isCharging: charging,
     isConnected: connected
   });
-  const acc = accentForName(model.palette.accentName, now.getHours());
+  const acc = accentFor(now.getHours());
 
   /* — Strings — */
   const timeStr = model.time.text;
@@ -353,8 +317,7 @@ function draw(event) {
   drawMountains();
 
   // 5. Thin accent divider between sky and dial
-  const divInset = IS_ROUND ? 40 : 12;
-  render.drawLine(divInset, DIVIDER_Y, W - divInset, DIVIDER_Y, acc, 1);
+  render.drawLine(animation.sweepInset, DIVIDER_Y, W - animation.sweepInset, DIVIDER_Y, acc, 1);
   drawSecondSweep(animation, acc);
 
   // 6. Time — LCD digits, white, centred
