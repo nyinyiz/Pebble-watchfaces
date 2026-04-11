@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+build/
+dist/
+*.pbw
+*.waf*
+pebble-js-app.js
+logs/

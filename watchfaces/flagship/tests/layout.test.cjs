@@ -1,0 +1,34 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+
+const { buildLayout } = require('../src/rocky/lib/layout');
+
+test('buildLayout centers the time block on rectangular screens', () => {
+  const layout = buildLayout({ width: 200, height: 228, isRound: false });
+
+  assert.deepEqual(layout.time, {
+    x: 100,
+    y: 96
+  });
+  assert.deepEqual(layout.date, {
+    x: 100,
+    y: 128
+  });
+});
+
+test('buildLayout moves content inward on round screens', () => {
+  const layout = buildLayout({ width: 180, height: 180, isRound: true });
+
+  assert.deepEqual(layout.time, {
+    x: 90,
+    y: 78
+  });
+  assert.deepEqual(layout.statusLeft, {
+    x: 40,
+    y: 128
+  });
+  assert.deepEqual(layout.statusRight, {
+    x: 140,
+    y: 128
+  });
+});
