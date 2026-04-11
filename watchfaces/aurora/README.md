@@ -1,4 +1,4 @@
-# Flagship
+# Aurora
 
 > Premium utility-first Pebble watchface — aurora borealis visual design.
 > Targets **emery** (Pebble Time 2, 200×228) and **gabbro** (Pebble Round 2, 260×260).

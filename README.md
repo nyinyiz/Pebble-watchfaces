@@ -1,12 +1,12 @@
-# Flagship — Pebble Watchface
+# Aurora — Pebble Watchface
 
 > A premium utility-first watchface with an aurora borealis visual design.
 
 <br>
 
-<img src="watchfaces/flagship/screenshots/banner_emery.png" alt="Flagship banner — emery" width="100%">
+<img src="watchfaces/aurora/screenshots/banner_emery.png" alt="Aurora banner — emery" width="100%">
 
-<img src="watchfaces/flagship/screenshots/banner_gabbro.png" alt="Flagship banner — gabbro" width="100%">
+<img src="watchfaces/aurora/screenshots/banner_gabbro.png" alt="Aurora banner — gabbro" width="100%">
 
 <br>
 
@@ -14,14 +14,14 @@
 
 | Pebble Time 2 &nbsp;·&nbsp; `emery` | Pebble Round 2 &nbsp;·&nbsp; `gabbro` |
 | :---: | :---: |
-| <img src="watchfaces/flagship/screenshots/screenshot_emery.png" alt="Flagship on emery" width="180"> | <img src="watchfaces/flagship/screenshots/screenshot_gabbro.png" alt="Flagship on gabbro" width="220"> |
+| <img src="watchfaces/aurora/screenshots/screenshot_emery.png" alt="Aurora on emery" width="180"> | <img src="watchfaces/aurora/screenshots/screenshot_gabbro.png" alt="Aurora on gabbro" width="220"> |
 | 200 × 228 px · rectangular | 260 × 260 px · round |
 
 <br>
 
 ## What It Does
 
-Flagship surfaces the information you actually glance at — time, date, battery, and connection — inside a layered aurora landscape that shifts with the time of day.
+Aurora surfaces the information you actually glance at — time, date, battery, and connection — inside a layered aurora landscape that shifts with the time of day.
 
 - **Animated aurora** — three sine-wave bands (violet → teal → green) that flow in real time
 - **Star field** with subtle per-second twinkling
@@ -37,7 +37,7 @@ Flagship surfaces the information you actually glance at — time, date, battery
 ## Quick Start
 
 ```bash
-cd watchfaces/flagship
+cd watchfaces/aurora
 
 # Run unit tests (no Pebble SDK required)
 npm test
@@ -98,14 +98,14 @@ Every second (`secondchange` event) the watchface redraws in this order:
 ## Project Structure
 
 ```
-watchfaces/flagship/
+watchfaces/aurora/
 ├── src/common/          shared logic (format, layout, model, animation)
 ├── src/embeddedjs/      on-device JS (Moddable / Poco)
 ├── src/c/               minimal Pebble C wrapper
 ├── src/pkjs/            companion phone app stub
 ├── tests/               Node.js unit tests
 ├── screenshots/         store assets (screenshots + banners)
-└── build/               generated — flagship.pbw lives here
+└── build/               generated — aurora.pbw lives here
 ```
 
 <br>
@@ -115,7 +115,7 @@ watchfaces/flagship/
 You need [Pebble SDK v4.9](https://developer.repebble.com/) with the CLI available on your `PATH`.
 
 ```bash
-pebble build                              # produces build/flagship.pbw
+pebble build                              # produces build/aurora.pbw
 pebble install --emulator emery           # rectangular emulator
 pebble install --emulator gabbro          # round emulator
 pebble screenshot --no-open --emulator emery emery.png
