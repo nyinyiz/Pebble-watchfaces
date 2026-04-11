@@ -2,7 +2,7 @@
   "name": "flagship-watchface",
   "version": "0.1.0",
   "private": true,
-  "description": "A premium utility-first Pebble watchface for the Spring 2026 contest.",
+  "description": "A premium utility-first Pebble watchface with an aurora borealis visual design.",
   "author": "nyinyiz",
   "license": "UNLICENSED",
   "scripts": {
