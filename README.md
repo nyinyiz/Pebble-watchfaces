@@ -1,30 +1,32 @@
-# Flagship Pebble Watchface
+# Pebble Watchfaces
 
-A contest-ready Pebble watchface project focused on polished daily utility for Time 2 and Round 2.
+A small Pebble watchfaces project. More watchfaces can be added under `watchfaces/` over time.
 
-## Goals
+Right now the first design is `flagship`.
 
-- Ship a professional first public watchface for the Spring 2026 Pebble App Contest
-- Support `emery` and `gabbro` from the start
-- Keep core display logic testable locally before integrating with the Pebble toolchain
-
-## Repository Layout
-
-- `docs/` - contest notes, design choices, submission checklist
-- `watchfaces/flagship/` - the Pebble project
-
-## Local Development
-
-This repository is structured so the pure formatting and layout logic can be tested with Node before the Pebble SDK is installed locally.
+## Quick Start
 
 ```bash
 cd watchfaces/flagship
 npm test
-```
-
-Later, when the Pebble CLI is installed:
-
-```bash
 pebble build
 pebble install --emulator emery
+pebble install --emulator gabbro
 ```
+
+## Current Watchface
+
+### Flagship
+
+The current screenshots below are for the `flagship` design.
+
+#### Screenshots
+
+| Platform | Preview |
+| --- | --- |
+| Emery | <img src="watchfaces/flagship/screenshots/aurora_v2.png" alt="Flagship emery screenshot" width="180"> |
+| Gabbro | <img src="watchfaces/flagship/screenshots/gabbro_v4.png" alt="Flagship gabbro screenshot" width="180"> |
+
+## Source
+
+- `watchfaces/flagship/`

@@ -1,67 +1,63 @@
 # Flagship
 
-Flagship is a premium utility-first Pebble watchface designed for the Spring 2026 Pebble App Contest.
+Flagship is a hobby Pebble watchface focused on calm, useful daily information.
 
 ## Current Scope
 
-- Large time display
-- Compact uppercase date
-- Battery status
-- Connection status
-- Layout targets for `emery` and `gabbro`
+- large time display
+- compact uppercase date
+- battery status
+- connection status
+- layout support for `emery` and `gabbro`
 
 ## Development Workflow
 
-### 1. Work locally
-
-Use this repository as the source of truth.
+### Work locally first
 
 ```bash
 cd watchfaces/flagship
 npm test
 ```
 
-### 2. Push to GitHub
-
-After creating your remote repository:
+### Build with the Pebble CLI
 
 ```bash
-git remote add origin <your-github-repo-url>
-git push -u origin main
+cd watchfaces/flagship
+pebble build
 ```
 
-### 3. Bring the project into the Pebble cloud workflow
-
-Use the rePebble developer environment to open or import the project from GitHub once the repository is pushed.
-
-## Testing Plan
-
-### Local now
-
-- `npm test` verifies pure formatting and layout logic
-
-### After Pebble CLI is installed
+### Run on emulators
 
 ```bash
-pebble build
+cd watchfaces/flagship
 pebble install --emulator emery
 pebble install --emulator gabbro
-pebble logs
 ```
 
-### On device
+### Useful extras
 
-- Install via the Pebble phone app developer connection flow
-- Confirm legibility outdoors and on wrist
-- Confirm the minute tick refresh is stable
+```bash
+pebble logs --emulator emery
+pebble logs --emulator gabbro
+pebble screenshot --emulator emery --no-open emery.png
+pebble screenshot --emulator gabbro --no-open gabbro.png
+```
 
-## Submission Materials
+## What Gets Tested Locally
 
-Prepare these before appstore submission:
+The Node tests cover the pure logic parts of the watchface:
 
-- final `.pbw`
-- GitHub repository URL
-- support email
-- description copy
-- screenshots for `emery`
-- screenshots for `gabbro`
+- time formatting
+- date formatting
+- battery and connection labels
+- layout behavior for round and rectangular targets
+- combined face model generation
+
+## Structure
+
+- `src/common/` - shared watchface logic
+- `src/c/` - native Pebble app entry point
+- `src/pkjs/` - PebbleKit JS code
+- `src/embeddedjs/` - Moddable embedded JavaScript
+- `tests/` - local logic tests
+- `screenshots/` - reference images
