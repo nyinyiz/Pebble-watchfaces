@@ -4,5 +4,6 @@ build/
 dist/
 *.pbw
 *.waf*
+.lock-waf*
 pebble-js-app.js
 logs/

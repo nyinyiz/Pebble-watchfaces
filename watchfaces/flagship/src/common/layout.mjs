@@ -3,6 +3,8 @@ export function buildLayout(bounds) {
 
   if (bounds.isRound) {
     return {
+      label: { x: centerX, y: 30 },
+      meridiem: { x: centerX, y: 54 },
       time: { x: centerX, y: 78 },
       date: { x: centerX, y: 106 },
       statusLeft: { x: 40, y: 128 },
@@ -11,6 +13,8 @@ export function buildLayout(bounds) {
   }
 
   return {
+    label: { x: centerX, y: 42 },
+    meridiem: { x: centerX, y: 70 },
     time: { x: centerX, y: 96 },
     date: { x: centerX, y: 128 },
     statusLeft: { x: 34, y: 176 },
