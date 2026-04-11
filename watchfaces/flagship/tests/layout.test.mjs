@@ -29,30 +29,30 @@ test('buildLayout centers the time block on rectangular screens', () => {
 });
 
 test('buildLayout moves content inward on round screens', () => {
-  const layout = buildLayout({ width: 180, height: 180, isRound: true });
+  const layout = buildLayout({ width: 260, height: 260, isRound: true });
 
   assert.deepEqual(layout.time, {
-    x: 90,
-    y: 78
+    x: 130,
+    y: 110
   });
   assert.deepEqual(layout.meridiem, {
-    x: 90,
+    x: 130,
     y: 54
   });
   assert.deepEqual(layout.statusLeft, {
-    x: 40,
-    y: 128
+    x: 44,
+    y: 192
   });
   assert.deepEqual(layout.statusCenter, {
-    x: 90,
-    y: 128
+    x: 130,
+    y: 192
   });
   assert.deepEqual(layout.statusRight, {
-    x: 140,
-    y: 128
+    x: 216,
+    y: 192
   });
   assert.deepEqual(layout.label, {
-    x: 90,
+    x: 130,
     y: 30
   });
 });

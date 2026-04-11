@@ -5,11 +5,11 @@ export function buildLayout(bounds) {
     return {
       label: { x: centerX, y: 30 },
       meridiem: { x: centerX, y: 54 },
-      time: { x: centerX, y: 78 },
-      date: { x: centerX, y: 106 },
-      statusLeft: { x: 40, y: 128 },
-      statusCenter: { x: centerX, y: 128 },
-      statusRight: { x: bounds.width - 40, y: 128 }
+      time: { x: centerX, y: 110 },
+      date: { x: centerX, y: 154 },
+      statusLeft: { x: 44, y: 192 },
+      statusCenter: { x: centerX, y: 192 },
+      statusRight: { x: bounds.width - 44, y: 192 }
     };
   }
 
