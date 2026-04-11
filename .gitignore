@@ -7,3 +7,5 @@ dist/
 .lock-waf*
 pebble-js-app.js
 logs/
+docs/
+pebble-watchface-agent-skill/

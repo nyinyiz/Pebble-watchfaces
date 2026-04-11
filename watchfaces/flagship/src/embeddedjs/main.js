@@ -2,10 +2,10 @@ import Poco from "commodetto/Poco";
 
 const render = new Poco(screen);
 
-/* ─── Fonts (names/sizes from the Pebble system font registry) ──────────────
- *   "Leco-Regular",  42  →  FONT_KEY_LECO_42_NUMBERS     (LCD-style digits)
- *   "Gothic-Bold",   24  →  FONT_KEY_GOTHIC_24_BOLD       (full char set)
- *   "Gothic-Bold",   18  →  FONT_KEY_GOTHIC_18_BOLD       (compact labels)
+/* ─── Fonts (names/sizes from Pebble system font registry) ──────────────────
+ *   "Leco-Regular",  42  →  FONT_KEY_LECO_42_NUMBERS    (LCD-style digits)
+ *   "Gothic-Bold",   24  →  FONT_KEY_GOTHIC_24_BOLD      (date label)
+ *   "Gothic-Bold",   18  →  FONT_KEY_GOTHIC_18_BOLD      (status labels)
  * ─────────────────────────────────────────────────────────────────────────── */
 const timeFont   = new render.Font("Leco-Regular", 42);
 const dateFont   = new render.Font("Gothic-Bold",  24);
@@ -17,18 +17,19 @@ const C_WHITE     = render.makeColor(255, 255, 255);
 const C_DIM       = render.makeColor(100, 106, 128);
 const C_BATT_RAIL = render.makeColor(22,  22,  32);
 const C_DANGER    = render.makeColor(235, 87,  87);
+const C_SNOW      = render.makeColor(210, 230, 255);  // cool white for snow caps
 
-// Aurora bands — drawn back-to-front: violet → teal → vivid green
+// Aurora bands — back-to-front: violet → teal → vivid green
 const C_AURORA = [
   render.makeColor(98,  58,  205),   // deep violet  (back)
   render.makeColor(50,  175, 200),   // teal          (mid)
   render.makeColor(50,  225, 115),   // vivid green   (front)
 ];
 
-// Time-of-day accent colours
-const C_DAWN  = render.makeColor(248, 184, 79);   // warm amber  (06:00–11:59)
-const C_DAY   = render.makeColor(95,  208, 255);  // sky blue    (12:00–17:59)
-const C_NIGHT = render.makeColor(128, 168, 245);  // cool violet (18:00–05:59)
+// Time-of-day accent
+const C_DAWN  = render.makeColor(248, 184, 79);   // warm amber  06:00–11:59
+const C_DAY   = render.makeColor(95,  208, 255);  // sky blue    12:00–17:59
+const C_NIGHT = render.makeColor(128, 168, 245);  // cool violet 18:00–05:59
 
 /* ─── Screen geometry ────────────────────────────────────────────────────── */
 const W        = render.width;
@@ -36,47 +37,74 @@ const H        = render.height;
 const IS_ROUND = W === H;
 
 /* ─── Star field ─────────────────────────────────────────────────────────── */
-// Positions spread across aurora zone (Y 5–85 rect / 5–95 round).
-// Larger entries (i % 4 === 1) are drawn 2×2 for a subtle magnitude variation.
+// Positions in the aurora / sky zone (Y 5–65 — above the mountain line).
+// Deliberately kept above Y=65 so most stars are not hidden by mountains.
 const STARS_RECT = [
-  [  8, 14], [ 25,  8], [ 50, 20], [ 75,  6], [ 98, 16],
-  [125,  9], [150, 22], [178, 11], [194, 18],
-  [ 15, 32], [ 40, 38], [ 70, 28], [100, 35], [128, 42],
-  [155, 30], [184, 37],
-  [ 10, 55], [ 45, 62], [ 85, 50], [115, 58], [148, 65],
-  [180, 52],
-  [ 30, 75], [110, 70],
+  [  8, 12], [ 25,  7], [ 50, 18], [ 75,  5], [ 98, 14],
+  [125,  8], [150, 20], [178, 10], [194, 17],
+  [ 15, 30], [ 40, 36], [ 70, 26], [100, 33], [128, 40],
+  [155, 28], [184, 35],
+  [ 10, 52], [ 45, 58], [ 85, 48], [115, 55], [148, 62],
+  [180, 50],
 ];
 
-// Scale x-positions for the wider round display
 const STARS = IS_ROUND
   ? STARS_RECT.map(([x, y]) => [Math.round(x * W / 200), y + 5])
   : STARS_RECT;
 
-/* ─── Aurora band configuration ──────────────────────────────────────────── */
-// Rendered back-to-front so violet is at the bottom, green at the top.
-//   baseY  — vertical centre of the sine wave on emery / gabbro
-//   amp    — peak vertical displacement in pixels
-//   halfH  — half the band thickness at its widest point
-//   freq   — spatial frequency in radians per pixel
-//   speed  — phase advance in radians per animation frame (= 1 per minute)
+/* ─── Aurora configuration ───────────────────────────────────────────────── */
 const AURORA_TOP = IS_ROUND ? 8  : 5;
-const AURORA_BOT = IS_ROUND ? 95 : 85;
+const AURORA_BOT = IS_ROUND ? 95 : 85;   // aurora is clipped here
 
+// Three sine-wave bands drawn back-to-front.
 const BANDS = [
   { baseY: IS_ROUND ? 78 : 68, amp: 7,  halfH: 5, freq: 0.035, speed: 0.110 },
   { baseY: IS_ROUND ? 58 : 48, amp: 10, halfH: 7, freq: 0.025, speed: 0.165 },
   { baseY: IS_ROUND ? 35 : 28, amp: 9,  halfH: 5, freq: 0.018, speed: 0.140 },
 ];
 
-/* ─── Animation frame counter (increments every minute) ─────────────────── */
+/* ─── Mountain silhouette ────────────────────────────────────────────────── */
+// Mountains sit at the bottom of the aurora zone and create a dark landscape
+// silhouette against the lights — each peak is a parabolic bump.
+// [center_x, peak_height_in_px, spread_in_px]
+const MTN_PEAKS = IS_ROUND
+  ? [[50, 14, 24], [95, 12, 18], [132, 20, 30], [180, 13, 20], [230, 10, 16]]
+  : [[20, 12, 20], [58, 10, 16], [102, 17, 26], [148, 11, 18], [185,  8, 14]];
+
+const MTN_BASE = AURORA_BOT;   // mountains sit on top of aurora bottom edge
+
+// Pre-compute mountain profile once at startup — lookup table avoids per-frame
+// arithmetic cost that would otherwise be O(W × peaks) every draw call.
+// Only built for rectangular screens; round display uses a flat horizon.
+function buildMtnProfile() {
+  if (IS_ROUND) return null;
+  const profile = [];
+  for (let x = 0; x < W; x++) {
+    let h = 3;   // minimum terrain height
+    for (let i = 0; i < MTN_PEAKS.length; i++) {
+      const cx     = MTN_PEAKS[i][0];
+      const ph     = MTN_PEAKS[i][1];
+      const spread = MTN_PEAKS[i][2];
+      const d = x - cx;
+      if (d > -spread && d < spread) {
+        const v = Math.round(ph * (1 - (d * d) / (spread * spread)));
+        if (v > h) h = v;
+      }
+    }
+    profile[x] = h;
+  }
+  return profile;
+}
+const MTN_PROFILE = buildMtnProfile();
+
+/* ─── Animation frame counter ────────────────────────────────────────────── */
 let frame = 0;
 
 /* ─── Layout Y positions ─────────────────────────────────────────────────── */
 const DIVIDER_Y = IS_ROUND ? 100 : 88;
-const TIME_Y    = IS_ROUND ? 108 : 96;   // Leco 42 → bottom ≈ TIME_Y + 42
-const DATE_Y    = IS_ROUND ? 162 : 150;  // Gothic 24
-const STATUS_Y  = IS_ROUND ? 204 : 192;  // Gothic 18
+const TIME_Y    = IS_ROUND ? 108 : 96;
+const DATE_Y    = IS_ROUND ? 162 : 150;
+const STATUS_Y  = IS_ROUND ? 204 : 192;
 
 /* ─── Pure helpers ───────────────────────────────────────────────────────── */
 function accentFor(hours) {
@@ -87,23 +115,17 @@ function accentFor(hours) {
 
 function pad2(n) { return n < 10 ? `0${n}` : `${n}`; }
 
-/* ─── Star renderer ──────────────────────────────────────────────────────── */
+/* ─── Sub-renderers ──────────────────────────────────────────────────────── */
 function drawStars() {
   for (let i = 0; i < STARS.length; i++) {
     const [x, y] = STARS[i];
-    // Rotate which stars appear "dimmed" each minute → subtle twinkle effect.
     const dimmed = (i + frame) % 5 === 0;
     const col    = dimmed ? C_AURORA[1] : C_WHITE;
-    // Larger stars drawn 2×2 for magnitude variation.
     const sz     = (!dimmed && i % 4 === 1) ? 2 : 1;
     render.fillRectangle(col, x, y, sz, sz);
   }
 }
 
-/* ─── Aurora renderer ────────────────────────────────────────────────────── */
-// For each x column, compute the sine-wave centre and draw a vertical stripe.
-// Edge-fade: half-height tapers to zero within 15 px of each screen edge,
-// giving natural-looking band termination rather than a hard cutoff.
 function drawAurora() {
   for (let b = 0; b < BANDS.length; b++) {
     const { baseY, amp, halfH, freq, speed } = BANDS[b];
@@ -124,7 +146,30 @@ function drawAurora() {
   }
 }
 
-/* ─── Battery bar renderer ───────────────────────────────────────────────── */
+function drawMountains() {
+  if (!MTN_PROFILE) {
+    // Round display: flat dark horizon strip — clean and avoids startup cost
+    render.fillRectangle(C_BG, 0, MTN_BASE - 4, W, DIVIDER_Y - MTN_BASE + 4);
+    return;
+  }
+
+  // Rect display: full mountain silhouette
+  for (let x = 0; x < W; x++) {
+    const h = MTN_PROFILE[x];
+    render.fillRectangle(C_BG, x, MTN_BASE - h, 1, DIVIDER_Y - MTN_BASE + h);
+  }
+
+  // Snow caps — tiny highlight on every local peak above the snow line.
+  let prevH = MTN_PROFILE[0];
+  for (let x = 1; x < W - 1; x++) {
+    const h = MTN_PROFILE[x];
+    if (h > prevH && h >= MTN_PROFILE[x + 1] && h >= 9) {
+      render.fillRectangle(C_SNOW, x - 1, MTN_BASE - h - 1, 3, 2);
+    }
+    prevH = h;
+  }
+}
+
 function drawBatteryBar(pct, charging) {
   const barW = Math.max(2, Math.round(W * pct / 100));
   const col  = charging    ? C_AURORA[1]
@@ -135,7 +180,7 @@ function drawBatteryBar(pct, charging) {
   render.fillRectangle(col,         0, 0, barW, 3);
 }
 
-/* ─── Main render function ───────────────────────────────────────────────── */
+/* ─── Main render ────────────────────────────────────────────────────────── */
 function draw() {
   const now      = new Date();
   const hrs      = now.getHours();
@@ -145,10 +190,10 @@ function draw() {
   const is24h    = watch?.timeStyle !== "12h";
   const connected = watch?.connected !== false;
 
-  /* — Build display strings — */
-  const h12      = hrs % 12 || 12;
-  const minStr   = pad2(now.getMinutes());
-  const timeStr  = is24h ? `${hrs}:${minStr}` : `${h12}:${minStr}`;
+  /* — Strings — */
+  const h12     = hrs % 12 || 12;
+  const minStr  = pad2(now.getMinutes());
+  const timeStr = is24h ? `${hrs}:${minStr}` : `${h12}:${minStr}`;
   const meridStr = is24h ? "" : hrs >= 12 ? "PM" : "AM";
 
   const DAYS   = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -161,31 +206,33 @@ function draw() {
                 :               `${Math.round(pct)}%`;
   const connStr = connected ? "ONLINE" : "OFFLINE";
 
-  /* — Render pass — */
+  /* — Render — */
   render.begin();
 
-  // 1. Solid black background
+  // 1. Black background
   render.fillRectangle(C_BG, 0, 0, W, H);
 
-  // 2. Star field (beneath aurora so they peek through the gaps)
+  // 2. Stars (behind aurora)
   drawStars();
 
   // 3. Aurora bands — violet, then teal, then green on top
   drawAurora();
 
-  // 4. Accent divider line — visually separates sky from dial area
+  // 4. Mountain silhouette — black overlay on the lower aurora zone, with snow caps
+  drawMountains();
+
+  // 5. Thin accent divider between sky and dial
   const divInset = IS_ROUND ? 40 : 12;
   render.drawLine(divInset, DIVIDER_Y, W - divInset, DIVIDER_Y, acc, 1);
 
-  // 5. Time — LCD-style digits, white, horizontally centred
+  // 6. Time — LCD digits, white, centred
   const timeW = render.getTextWidth(timeStr, timeFont);
   const timeX = Math.round((W - timeW) / 2);
   render.drawText(timeStr, timeFont, C_WHITE, timeX, TIME_Y);
 
-  // 6. Meridiem — accent colour, tucked to the right of the time digits
+  // 7. Meridiem — accent, right of time, lower baseline
   if (meridStr) {
     const mW = render.getTextWidth(meridStr, dateFont);
-    // Offset down so it sits at the lower baseline of the larger time glyph
     const mX = timeX + timeW + 5;
     const mY = TIME_Y + 22;
     if (mX + mW < W - 2) {
@@ -193,11 +240,11 @@ function draw() {
     }
   }
 
-  // 7. Date — accent colour, centred
+  // 8. Date
   const dateW = render.getTextWidth(dateStr, dateFont);
   render.drawText(dateStr, dateFont, acc, Math.round((W - dateW) / 2), DATE_Y);
 
-  // 8. Status row — battery on the left quarter, connection on the right quarter
+  // 9. Status row
   const batW    = render.getTextWidth(batStr,  statusFont);
   const connW   = render.getTextWidth(connStr, statusFont);
   const batCol  = pct <= 20  ? C_DANGER : C_DIM;
@@ -208,16 +255,15 @@ function draw() {
   render.drawText(connStr, statusFont, connCol,
     Math.round(3 * quarter - connW / 2), STATUS_Y);
 
-  // 9. Battery fill bar — always drawn last so it is never occluded
+  // 10. Battery bar — always on top
   drawBatteryBar(pct, charging);
 
   render.end();
 
-  // Advance frame counter (bounded to prevent integer overflow)
   frame = (frame + 1) % 1000;
 }
 
-/* ─── Event listeners ────────────────────────────────────────────────────── */
+/* ─── Events ─────────────────────────────────────────────────────────────── */
 watch.addEventListener("minutechange",              draw);
 watch.addEventListener("wake",                      draw);
 watch.addEventListener("batterychange",             draw);
