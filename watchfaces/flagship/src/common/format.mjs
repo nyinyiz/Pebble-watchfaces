@@ -22,5 +22,5 @@ export function formatBattery(percent) {
 }
 
 export function formatConnection(isConnected) {
-  return isConnected ? 'CONNECTED' : 'OFFLINE';
+  return isConnected ? 'BT OK' : 'BT OFF';
 }

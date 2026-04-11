@@ -15,13 +15,14 @@ test('buildFaceModel derives a calm morning palette and 24-hour time', () => {
   assert.equal(model.time.text, '9:05');
   assert.equal(model.time.meridiem, '');
   assert.equal(model.statusLeft.text, '82%');
-  assert.equal(model.statusRight.text, 'ONLINE');
+  assert.equal(model.statusCenter.text, 'SEC 00');
+  assert.equal(model.statusRight.text, 'BT OK');
   assert.equal(model.palette.accentName, 'morning');
 });
 
 test('buildFaceModel adds meridiem and charging text in 12-hour mode', () => {
   const model = buildFaceModel({
-    date: new Date('2026-04-11T21:07:00'),
+    date: new Date('2026-04-11T21:07:49'),
     is24Hour: false,
     batteryPercent: 58,
     isCharging: true,
@@ -31,7 +32,8 @@ test('buildFaceModel adds meridiem and charging text in 12-hour mode', () => {
   assert.equal(model.time.text, '9:07');
   assert.equal(model.time.meridiem, 'PM');
   assert.equal(model.statusLeft.text, '58% CHG');
-  assert.equal(model.statusRight.text, 'OFFLINE');
+  assert.equal(model.statusCenter.text, 'SEC 49');
+  assert.equal(model.statusRight.text, 'BT OFF');
   assert.equal(model.palette.accentName, 'night');
 });
 
@@ -45,5 +47,7 @@ test('buildFaceModel surfaces a low-battery warning label', () => {
   });
 
   assert.equal(model.statusLeft.text, '14% LOW');
+  assert.equal(model.statusCenter.text, 'SEC 00');
+  assert.equal(model.statusRight.text, 'BT OK');
   assert.equal(model.palette.accentName, 'day');
 });

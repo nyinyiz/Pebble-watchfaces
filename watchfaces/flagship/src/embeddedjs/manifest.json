@@ -4,9 +4,7 @@
   ],
   "modules": {
     "*": [
-      "./main.js",
-      "../common/format.mjs",
-      "../common/layout.mjs"
+      "./main.js"
     ]
   }
 }

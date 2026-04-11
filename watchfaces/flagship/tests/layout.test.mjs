@@ -22,6 +22,10 @@ test('buildLayout centers the time block on rectangular screens', () => {
     x: 100,
     y: 42
   });
+  assert.deepEqual(layout.statusCenter, {
+    x: 100,
+    y: 176
+  });
 });
 
 test('buildLayout moves content inward on round screens', () => {
@@ -37,6 +41,10 @@ test('buildLayout moves content inward on round screens', () => {
   });
   assert.deepEqual(layout.statusLeft, {
     x: 40,
+    y: 128
+  });
+  assert.deepEqual(layout.statusCenter, {
+    x: 90,
     y: 128
   });
   assert.deepEqual(layout.statusRight, {

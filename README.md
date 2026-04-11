@@ -24,7 +24,7 @@ The current screenshots below are for the `flagship` design.
 
 | Platform | Preview |
 | --- | --- |
-| Emery | <img src="watchfaces/flagship/screenshots/aurora_v2.png" alt="Flagship emery screenshot" width="180"> |
+| Emery | <img src="watchfaces/flagship/screenshots/flagship.png" alt="Flagship emery screenshot" width="180"> |
 
 ## Source
 

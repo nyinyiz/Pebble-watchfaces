@@ -35,6 +35,9 @@ const C_NIGHT = render.makeColor(128, 168, 245);  // cool violet 18:00–05:59
 const W        = render.width;
 const H        = render.height;
 const IS_ROUND = W === H;
+const TWO_PI = Math.PI * 2;
+const BAND_MULTIPLIERS = [0.85, 1.25, 1.65];
+const BAND_OFFSETS = [0.2, 1.1, 2.4];
 
 /* ─── Star field ─────────────────────────────────────────────────────────── */
 // Positions in the aurora / sky zone (Y 5–65 — above the mountain line).
@@ -97,52 +100,181 @@ function buildMtnProfile() {
 }
 const MTN_PROFILE = buildMtnProfile();
 
-/* ─── Animation frame counter ────────────────────────────────────────────── */
-let frame = 0;
-
-/* ─── Layout Y positions ─────────────────────────────────────────────────── */
+/* ─── Layout positions ───────────────────────────────────────────────────── */
 const DIVIDER_Y = IS_ROUND ? 100 : 88;
-const TIME_Y    = IS_ROUND ? 108 : 96;
-const DATE_Y    = IS_ROUND ? 162 : 150;
-const STATUS_Y  = IS_ROUND ? 204 : 192;
+const LAYOUT = buildLayout({ width: W, height: H, isRound: IS_ROUND });
 
 /* ─── Pure helpers ───────────────────────────────────────────────────────── */
+function formatTime(date, is24Hour) {
+  const hours24 = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  if (is24Hour) return `${hours24}:${minutes}`;
+  return `${hours24 % 12 || 12}:${minutes}`;
+}
+
+function formatDate(date) {
+  const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  return `${weekdays[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+}
+
+function formatBattery(percent) {
+  return `${Math.round(percent)}%`;
+}
+
+function formatConnection(isConnected) {
+  return isConnected ? "BT OK" : "BT OFF";
+}
+
 function accentFor(hours) {
   if (hours < 6 || hours >= 18) return C_NIGHT;
   if (hours < 12) return C_DAWN;
   return C_DAY;
 }
 
-function pad2(n) { return n < 10 ? `0${n}` : `${n}`; }
+function accentForName(name, hours) {
+  if (name === "morning") return C_DAWN;
+  if (name === "day") return C_DAY;
+  if (name === "night") return C_NIGHT;
+  return accentFor(hours);
+}
+
+function buildLayout(bounds) {
+  const centerX = Math.round(bounds.width / 2);
+
+  if (bounds.isRound) {
+    return {
+      label: { x: centerX, y: 30 },
+      meridiem: { x: centerX, y: 54 },
+      time: { x: centerX, y: 78 },
+      date: { x: centerX, y: 106 },
+      statusLeft: { x: 40, y: 128 },
+      statusCenter: { x: centerX, y: 128 },
+      statusRight: { x: bounds.width - 40, y: 128 }
+    };
+  }
+
+  return {
+    label: { x: centerX, y: 42 },
+    meridiem: { x: centerX, y: 70 },
+    time: { x: centerX, y: 96 },
+    date: { x: centerX, y: 128 },
+    statusLeft: { x: 34, y: 176 },
+    statusCenter: { x: centerX, y: 176 },
+    statusRight: { x: bounds.width - 34, y: 176 }
+  };
+}
+
+function buildAnimationState({ date, width, isRound }) {
+  const seconds = date.getSeconds();
+  const milliseconds = typeof date.getMilliseconds === "function"
+    ? date.getMilliseconds()
+    : 0;
+  const secondProgress = ((seconds * 1000) + milliseconds) / 60000;
+  const sweepInset = isRound ? 40 : 12;
+  const sweepHalfWidth = isRound ? 9 : 7;
+  const trackWidth = Math.max(0, width - (sweepInset * 2));
+  const sweepX = sweepInset + Math.round(trackWidth * secondProgress);
+  const bandPhases = BAND_MULTIPLIERS.map((multiplier, index) => {
+    const raw = (secondProgress * TWO_PI * multiplier) + BAND_OFFSETS[index];
+    return raw % TWO_PI;
+  });
+
+  return {
+    secondProgress,
+    sweepInset,
+    sweepHalfWidth,
+    sweepX,
+    bandPhases,
+    twinkleOffset: seconds % 5,
+    pulse: Math.sin(secondProgress * TWO_PI)
+  };
+}
+
+function buildFaceModel(state) {
+  const hours = state.date.getHours();
+  const batteryBase = formatBattery(state.batteryPercent);
+  let batteryText = batteryBase;
+
+  if (state.isCharging) {
+    batteryText = `${batteryBase} CHG`;
+  } else if (state.batteryPercent <= 20) {
+    batteryText = `${batteryBase} LOW`;
+  }
+
+  return {
+    palette: {
+      accentName: hours < 6 || hours >= 18 ? "night" : hours < 12 ? "morning" : "day"
+    },
+    time: {
+      text: formatTime(state.date, state.is24Hour),
+      meridiem: state.is24Hour ? "" : hours >= 12 ? "PM" : "AM"
+    },
+    date: {
+      text: formatDate(state.date)
+    },
+    statusLeft: {
+      text: batteryText
+    },
+    statusCenter: {
+      text: `SEC ${String(state.date.getSeconds()).padStart(2, "0")}`
+    },
+    statusRight: {
+      text: formatConnection(state.isConnected)
+    }
+  };
+}
 
 /* ─── Sub-renderers ──────────────────────────────────────────────────────── */
-function drawStars() {
+function drawStars(animation) {
   for (let i = 0; i < STARS.length; i++) {
     const [x, y] = STARS[i];
-    const dimmed = (i + frame) % 5 === 0;
+    const dimmed = (i + animation.twinkleOffset) % 5 === 0;
     const col    = dimmed ? C_AURORA[1] : C_WHITE;
     const sz     = (!dimmed && i % 4 === 1) ? 2 : 1;
     render.fillRectangle(col, x, y, sz, sz);
   }
 }
 
-function drawAurora() {
-  for (let b = 0; b < BANDS.length; b++) {
-    const { baseY, amp, halfH, freq, speed } = BANDS[b];
-    const phase = frame * speed;
+function drawAurora(animation) {
+  const step = 2;
 
-    for (let x = 0; x < W; x++) {
+  for (let b = 0; b < BANDS.length; b++) {
+    const { baseY, amp, halfH, freq } = BANDS[b];
+    const phase = animation.bandPhases[b];
+    const animatedHalfH = halfH + (b === 1 ? Math.round(animation.pulse * 2) : 0);
+
+    for (let x = 0; x < W; x += step) {
       const edge = x < 15 ? x : (W - 1 - x < 15 ? W - 1 - x : 15);
-      const hh   = Math.round(halfH * edge / 15);
+      const hh   = Math.round(animatedHalfH * edge / 15);
       if (hh <= 0) continue;
 
       const yc = Math.round(baseY + Math.sin(x * freq + phase) * amp);
       const y0 = Math.max(yc - hh, AURORA_TOP);
       const y1 = Math.min(yc + hh, AURORA_BOT);
       if (y1 > y0) {
-        render.fillRectangle(C_AURORA[b], x, y0, 1, y1 - y0);
+        render.fillRectangle(C_AURORA[b], x, y0, Math.min(step, W - x), y1 - y0);
       }
     }
+  }
+}
+
+function drawSecondSweep(animation, acc) {
+  const pulseLeft = Math.max(
+    animation.sweepInset,
+    animation.sweepX - animation.sweepHalfWidth
+  );
+  const pulseRight = Math.min(
+    W - animation.sweepInset,
+    animation.sweepX + animation.sweepHalfWidth
+  );
+  const pulseWidth = Math.max(1, pulseRight - pulseLeft);
+
+  render.fillRectangle(acc, pulseLeft, DIVIDER_Y - 1, pulseWidth, 3);
+
+  if (pulseLeft > animation.sweepInset) {
+    render.drawLine(animation.sweepInset, DIVIDER_Y, pulseLeft, DIVIDER_Y, C_DIM, 1);
   }
 }
 
@@ -154,9 +286,9 @@ function drawMountains() {
   }
 
   // Rect display: full mountain silhouette
-  for (let x = 0; x < W; x++) {
-    const h = MTN_PROFILE[x];
-    render.fillRectangle(C_BG, x, MTN_BASE - h, 1, DIVIDER_Y - MTN_BASE + h);
+  for (let x = 0; x < W; x += 2) {
+    const h = Math.max(MTN_PROFILE[x], MTN_PROFILE[x + 1] || 0);
+    render.fillRectangle(C_BG, x, MTN_BASE - h, Math.min(2, W - x), DIVIDER_Y - MTN_BASE + h);
   }
 
   // Snow caps — tiny highlight on every local peak above the snow line.
@@ -181,30 +313,29 @@ function drawBatteryBar(pct, charging) {
 }
 
 /* ─── Main render ────────────────────────────────────────────────────────── */
-function draw() {
-  const now      = new Date();
-  const hrs      = now.getHours();
-  const acc      = accentFor(hrs);
+function draw(event) {
+  const now      = event?.date ?? new Date();
+  const animation = buildAnimationState({ date: now, width: W, isRound: IS_ROUND });
   const pct      = typeof watch?.battery  === "number"  ? watch.battery  : 100;
   const charging = typeof watch?.charging === "boolean" ? watch.charging : false;
   const is24h    = watch?.timeStyle !== "12h";
   const connected = watch?.connected !== false;
+  const model = buildFaceModel({
+    date: now,
+    is24Hour: is24h,
+    batteryPercent: pct,
+    isCharging: charging,
+    isConnected: connected
+  });
+  const acc = accentForName(model.palette.accentName, now.getHours());
 
   /* — Strings — */
-  const h12     = hrs % 12 || 12;
-  const minStr  = pad2(now.getMinutes());
-  const timeStr = is24h ? `${hrs}:${minStr}` : `${h12}:${minStr}`;
-  const meridStr = is24h ? "" : hrs >= 12 ? "PM" : "AM";
-
-  const DAYS   = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-  const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-                  "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-  const dateStr = `${DAYS[now.getDay()]}  ${now.getDate()}  ${MONTHS[now.getMonth()]}`;
-
-  const batStr  = charging    ? `${Math.round(pct)}% +`
-                : pct <= 20   ? `${Math.round(pct)}% !`
-                :               `${Math.round(pct)}%`;
-  const connStr = connected ? "ONLINE" : "OFFLINE";
+  const timeStr = model.time.text;
+  const meridStr = model.time.meridiem;
+  const dateStr = model.date.text;
+  const batStr = model.statusLeft.text;
+  const secStr = model.statusCenter.text;
+  const connStr = model.statusRight.text;
 
   /* — Render — */
   render.begin();
@@ -213,10 +344,10 @@ function draw() {
   render.fillRectangle(C_BG, 0, 0, W, H);
 
   // 2. Stars (behind aurora)
-  drawStars();
+  drawStars(animation);
 
   // 3. Aurora bands — violet, then teal, then green on top
-  drawAurora();
+  drawAurora(animation);
 
   // 4. Mountain silhouette — black overlay on the lower aurora zone, with snow caps
   drawMountains();
@@ -224,17 +355,18 @@ function draw() {
   // 5. Thin accent divider between sky and dial
   const divInset = IS_ROUND ? 40 : 12;
   render.drawLine(divInset, DIVIDER_Y, W - divInset, DIVIDER_Y, acc, 1);
+  drawSecondSweep(animation, acc);
 
   // 6. Time — LCD digits, white, centred
   const timeW = render.getTextWidth(timeStr, timeFont);
-  const timeX = Math.round((W - timeW) / 2);
-  render.drawText(timeStr, timeFont, C_WHITE, timeX, TIME_Y);
+  const timeX = Math.round(LAYOUT.time.x - (timeW / 2));
+  render.drawText(timeStr, timeFont, C_WHITE, timeX, LAYOUT.time.y);
 
   // 7. Meridiem — accent, right of time, lower baseline
   if (meridStr) {
     const mW = render.getTextWidth(meridStr, dateFont);
     const mX = timeX + timeW + 5;
-    const mY = TIME_Y + 22;
+    const mY = LAYOUT.time.y + 22;
     if (mX + mW < W - 2) {
       render.drawText(meridStr, dateFont, acc, mX, mY);
     }
@@ -242,32 +374,34 @@ function draw() {
 
   // 8. Date
   const dateW = render.getTextWidth(dateStr, dateFont);
-  render.drawText(dateStr, dateFont, acc, Math.round((W - dateW) / 2), DATE_Y);
+  render.drawText(dateStr, dateFont, acc,
+    Math.round(LAYOUT.date.x - (dateW / 2)), LAYOUT.date.y);
 
   // 9. Status row
   const batW    = render.getTextWidth(batStr,  statusFont);
+  const secW    = render.getTextWidth(secStr,  statusFont);
   const connW   = render.getTextWidth(connStr, statusFont);
   const batCol  = pct <= 20  ? C_DANGER : C_DIM;
+  const secCol  = acc;
   const connCol = connected  ? C_DIM    : C_DANGER;
-  const quarter = Math.round(W / 4);
   render.drawText(batStr,  statusFont, batCol,
-    Math.round(quarter     - batW  / 2), STATUS_Y);
+    Math.round(LAYOUT.statusLeft.x - (batW / 2)), LAYOUT.statusLeft.y);
+  render.drawText(secStr,  statusFont, secCol,
+    Math.round(LAYOUT.statusCenter.x - (secW / 2)), LAYOUT.statusCenter.y);
   render.drawText(connStr, statusFont, connCol,
-    Math.round(3 * quarter - connW / 2), STATUS_Y);
+    Math.round(LAYOUT.statusRight.x - (connW / 2)), LAYOUT.statusRight.y);
 
   // 10. Battery bar — always on top
   drawBatteryBar(pct, charging);
 
   render.end();
-
-  frame = (frame + 1) % 1000;
 }
 
 /* ─── Events ─────────────────────────────────────────────────────────────── */
-watch.addEventListener("minutechange",              draw);
+watch.addEventListener("secondchange",              draw);
 watch.addEventListener("wake",                      draw);
 watch.addEventListener("batterychange",             draw);
 watch.addEventListener("chargingchange",            draw);
 watch.addEventListener("bluetoothconnectionchange", draw);
 
-draw();
+draw({ date: new Date() });

@@ -31,6 +31,6 @@ test('formatBattery rounds percentage for compact display', () => {
 });
 
 test('formatConnection maps bluetooth state to face label', () => {
-  assert.equal(formatConnection(true), 'CONNECTED');
-  assert.equal(formatConnection(false), 'OFFLINE');
+  assert.equal(formatConnection(true), 'BT OK');
+  assert.equal(formatConnection(false), 'BT OFF');
 });
