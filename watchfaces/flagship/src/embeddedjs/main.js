@@ -1,5 +1,6 @@
 import Poco from "commodetto/Poco";
 import { buildAnimationState } from "animation";
+import Battery from "embedded:sensor/Battery";
 
 const render = new Poco(screen);
 
@@ -276,14 +277,33 @@ function drawBatteryBar(pct, charging) {
   render.fillRectangle(col,         0, 0, barW, 3);
 }
 
+/* ─── Battery state ──────────────────────────────────────────────────────── */
+let batteryPct = 100;
+let isCharging = false;
+
+const batteryMonitor = new Battery({
+  onSample() {
+    const s = batteryMonitor.sample();
+    batteryPct = s.percent;
+    isCharging = s.charging;
+    draw({ date: new Date() });
+  }
+});
+
+{
+  const s = batteryMonitor.sample();
+  batteryPct = s.percent;
+  isCharging = s.charging;
+}
+
 /* ─── Main render ────────────────────────────────────────────────────────── */
 function draw(event) {
   const now      = event?.date ?? new Date();
   const animation = buildAnimationState({ date: now, width: W, isRound: IS_ROUND });
-  const pct      = typeof watch?.battery  === "number"  ? watch.battery  : 100;
-  const charging = typeof watch?.charging === "boolean" ? watch.charging : false;
-  const is24h    = watch?.timeStyle !== "12h";
-  const connected = watch?.connected !== false;
+  const pct      = batteryPct;
+  const charging = isCharging;
+  const is24h    = !watch.hour12;
+  const connected = watch.connected?.app ?? true;
   const model = buildFaceModel({
     date: now,
     is24Hour: is24h,
@@ -361,10 +381,7 @@ function draw(event) {
 }
 
 /* ─── Events ─────────────────────────────────────────────────────────────── */
-watch.addEventListener("secondchange",              draw);
-watch.addEventListener("wake",                      draw);
-watch.addEventListener("batterychange",             draw);
-watch.addEventListener("chargingchange",            draw);
-watch.addEventListener("bluetoothconnectionchange", draw);
+watch.addEventListener("secondchange", draw);
+watch.addEventListener("connected",    () => draw({ date: new Date() }));
 
 draw({ date: new Date() });
