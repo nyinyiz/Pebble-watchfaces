@@ -5,9 +5,18 @@
 
 <br>
 
-| Pebble Time 2 &nbsp;`emery` | Pebble Round 2 &nbsp;`gabbro` |
+<img src="watchfaces/flagship/screenshots/banner_emery.png" alt="Flagship banner — emery" width="100%">
+
+<img src="watchfaces/flagship/screenshots/banner_gabbro.png" alt="Flagship banner — gabbro" width="100%">
+
+<br>
+
+### Live on device
+
+| Pebble Time 2 &nbsp;·&nbsp; `emery` | Pebble Round 2 &nbsp;·&nbsp; `gabbro` |
 | :---: | :---: |
 | <img src="watchfaces/flagship/screenshots/screenshot_emery.png" alt="Flagship on emery" width="180"> | <img src="watchfaces/flagship/screenshots/screenshot_gabbro.png" alt="Flagship on gabbro" width="220"> |
+| 200 × 228 px · rectangular | 260 × 260 px · round |
 
 <br>
 
