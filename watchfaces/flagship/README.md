@@ -1,63 +1,55 @@
 # Flagship
 
-Flagship is a hobby Pebble watchface focused on calm, useful daily information.
+> Premium utility-first Pebble watchface — aurora borealis visual design.
+> Targets **emery** (Pebble Time 2, 200×228) and **gabbro** (Pebble Round 2, 260×260).
 
-## Current Scope
+## Features
 
-- large time display
-- compact uppercase date
-- battery status
-- connection status
-- layout support for `emery` and `gabbro`
+| Feature | Detail |
+| --- | --- |
+| Aurora animation | Three sine-wave bands (violet → teal → green) driven by real-time seconds |
+| Star field | Twinkling points above the mountain horizon |
+| Mountain silhouette | Parabolic peaks with snow caps *(rectangular only)* |
+| Second-sweep pulse | Accent line traverses the divider once per minute |
+| Time-of-day accents | Amber · sky blue · violet, shifting at 06:00 / 12:00 / 18:00 |
+| Status row | Battery % · live seconds · Bluetooth state |
+| 12 h / 24 h | Auto-detected from watch settings |
 
-## Development Workflow
-
-### Work locally first
+## Development
 
 ```bash
-cd watchfaces/flagship
+# Test pure logic (no SDK needed)
 npm test
-```
 
-### Build with the Pebble CLI
-
-```bash
-cd watchfaces/flagship
+# Full build
 pebble build
-```
 
-### Run on emulators
-
-```bash
-cd watchfaces/flagship
+# Install to emulator
 pebble install --emulator emery
 pebble install --emulator gabbro
-```
 
-### Useful extras
-
-```bash
+# Useful extras
+pebble screenshot --no-open --emulator emery emery.png
+pebble screenshot --no-open --emulator gabbro gabbro.png
 pebble logs --emulator emery
-pebble logs --emulator gabbro
-pebble screenshot --emulator emery --no-open emery.png
-pebble screenshot --emulator gabbro --no-open gabbro.png
 ```
 
-## What Gets Tested Locally
+## Source Layout
 
-The Node tests cover the pure logic parts of the watchface:
+```
+src/
+├── common/          Pure JS — format, layout, model, animation (unit-tested)
+├── embeddedjs/      On-device rendering (Moddable XS / Poco)
+├── c/               Pebble app entry point (minimal C wrapper)
+└── pkjs/            Companion phone app
+tests/               Node.js native test runner (12 tests)
+```
 
-- time formatting
-- date formatting
-- battery and connection labels
-- layout behavior for round and rectangular targets
-- combined face model generation
+## Testing
 
-## Structure
+The test suite covers all pure logic without requiring a Pebble SDK:
 
-- `src/common/` - shared watchface logic
-- `src/c/` - native Pebble app entry point
-- `src/pkjs/` - PebbleKit JS code
-- `src/embeddedjs/` - Moddable embedded JavaScript
-- `tests/` - local logic tests
-- `screenshots/` - reference images
+- `format.test.mjs` — time, date, battery, Bluetooth label formatting
+- `layout.test.mjs` — position maps for round and rectangular screens
+- `model.test.mjs` — watch state → display model aggregation
+- `animation.test.mjs` — second-progress, band phases, sweep position
