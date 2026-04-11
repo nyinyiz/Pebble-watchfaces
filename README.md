@@ -1,7 +1,6 @@
 # Flagship — Pebble Watchface
 
 > A premium utility-first watchface with an aurora borealis visual design.
-> Built for the **Spring 2026 Pebble Watchface Contest**.
 
 <br>
 
