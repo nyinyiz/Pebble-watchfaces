@@ -15,16 +15,56 @@ const C_DIM = render.makeColor(100, 106, 128);
 const C_BATT_RAIL = render.makeColor(22, 22, 32);
 const C_DANGER = render.makeColor(235, 87, 87);
 const C_SNOW = render.makeColor(210, 230, 255);
+let activeThemeName = "night";
+let themeAccentColor = render.makeColor(128, 168, 245);
+let themeAuroraBack = render.makeColor(98, 58, 205);
+let themeAuroraMid = render.makeColor(50, 175, 200);
+let themeAuroraFront = render.makeColor(50, 225, 115);
 
-const C_AURORA = [
-  render.makeColor(98, 58, 205),
-  render.makeColor(50, 175, 200),
-  render.makeColor(50, 225, 115),
-];
+function applyThemeForHour(hours) {
+  let nextThemeName = "night";
 
-const C_DAWN = render.makeColor(248, 184, 79);
-const C_DAY = render.makeColor(95, 208, 255);
-const C_NIGHT = render.makeColor(128, 168, 245);
+  if (hours >= 6 && hours < 12) {
+    nextThemeName = "morning";
+  } else if (hours >= 12 && hours < 17) {
+    nextThemeName = "day";
+  } else if (hours >= 17 && hours < 20) {
+    nextThemeName = "evening";
+  }
+
+  if (nextThemeName === activeThemeName) {
+    return;
+  }
+
+  activeThemeName = nextThemeName;
+
+  switch (nextThemeName) {
+    case "morning":
+      themeAccentColor = render.makeColor(248, 184, 79);
+      themeAuroraBack = render.makeColor(118, 162, 255);
+      themeAuroraMid = render.makeColor(94, 226, 199);
+      themeAuroraFront = render.makeColor(255, 206, 120);
+      break;
+    case "day":
+      themeAccentColor = render.makeColor(95, 208, 255);
+      themeAuroraBack = render.makeColor(78, 128, 255);
+      themeAuroraMid = render.makeColor(71, 213, 255);
+      themeAuroraFront = render.makeColor(112, 255, 184);
+      break;
+    case "evening":
+      themeAccentColor = render.makeColor(255, 140, 92);
+      themeAuroraBack = render.makeColor(126, 78, 221);
+      themeAuroraMid = render.makeColor(214, 94, 192);
+      themeAuroraFront = render.makeColor(255, 158, 96);
+      break;
+    default:
+      themeAccentColor = render.makeColor(128, 168, 245);
+      themeAuroraBack = render.makeColor(98, 58, 205);
+      themeAuroraMid = render.makeColor(50, 175, 200);
+      themeAuroraFront = render.makeColor(50, 225, 115);
+      break;
+  }
+}
 
 const W = render.width;
 const H = render.height;
@@ -88,12 +128,6 @@ function formatConnection(isConnected) {
   return isConnected ? "BT OK" : "BT OFF";
 }
 
-function accentFor(hours) {
-  if (hours < 6 || hours >= 18) return C_NIGHT;
-  if (hours < 12) return C_DAWN;
-  return C_DAY;
-}
-
 function buildLayout(bounds) {
   const centerX = Math.round(bounds.width / 2);
 
@@ -155,7 +189,7 @@ function drawStars(animation) {
   for (let i = 0; i < STARS.length; i++) {
     const [x, y] = STARS[i];
     const dimmed = (i + animation.twinkleOffset) % 5 === 0;
-    const color = dimmed ? C_AURORA[1] : C_WHITE;
+    const color = dimmed ? themeAuroraMid : C_WHITE;
     const size = (!dimmed && i % 4 === 1) ? 2 : 1;
     render.fillRectangle(color, x, y, size, size);
   }
@@ -180,7 +214,10 @@ function drawAurora(animation) {
       const topY = Math.max(centerY - columnHalfHeight, AURORA_TOP);
       const bottomY = Math.min(centerY + columnHalfHeight, AURORA_BOT);
       if (bottomY > topY) {
-        render.fillRectangle(C_AURORA[bandIndex], x, topY, Math.min(step, W - x), bottomY - topY);
+        const bandColor = bandIndex === 0 ? themeAuroraBack
+          : bandIndex === 1 ? themeAuroraMid
+          : themeAuroraFront;
+        render.fillRectangle(bandColor, x, topY, Math.min(step, W - x), bottomY - topY);
       }
     }
   }
@@ -227,9 +264,9 @@ function drawMountains() {
 
 function drawBatteryBar(percent, charging) {
   const barWidth = Math.max(2, Math.round((W * percent) / 100));
-  const color = charging ? C_AURORA[1]
-    : percent > 30 ? C_AURORA[2]
-    : percent > 15 ? C_DAWN
+  const color = charging ? themeAuroraMid
+    : percent > 30 ? themeAuroraFront
+    : percent > 15 ? themeAccentColor
     : C_DANGER;
   render.fillRectangle(C_BATT_RAIL, 0, 0, W, 3);
   render.fillRectangle(color, 0, 0, barWidth, 3);
@@ -255,6 +292,7 @@ const batteryMonitor = new Battery({
 
 function draw(event) {
   const now = event?.date ?? new Date();
+  applyThemeForHour(now.getHours());
   const animation = buildAnimationState({ date: now, width: W, isRound: IS_ROUND });
   const is24Hour = !watch.hour12;
   const isConnected = watch.connected?.app ?? true;
@@ -265,7 +303,7 @@ function draw(event) {
     isCharging,
     isConnected
   });
-  const accentColor = accentFor(now.getHours());
+  const accentColor = themeAccentColor;
 
   const timeText = model.time.text;
   const meridiemText = model.time.meridiem;
