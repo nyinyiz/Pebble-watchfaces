@@ -13,7 +13,15 @@
     "watchapp": {
       "watchface": true
     },
-    "targetPlatforms": ["emery"],
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery",
+      "flint",
+      "gabbro"
+    ],
     "capabilities": [],
     "resources": {
       "media": []
