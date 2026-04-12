@@ -1,0 +1,19 @@
+{
+  "name": "dual",
+  "author": "Aurora Dev",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "pebble": {
+    "sdkVersion": "3",
+    "displayName": "Dual Time",
+    "uuid": "b7e4a912-3c8f-4d5b-9e21-f063a8712345",
+    "watchapp": {
+      "watchface": true
+    },
+    "targetPlatforms": ["emery"],
+    "capabilities": [],
+    "resources": {
+      "media": []
+    }
+  }
+}
