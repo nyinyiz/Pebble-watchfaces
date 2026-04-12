@@ -10,17 +10,17 @@
   },
   "pebble": {
     "displayName": "Aurora",
-    "projectType": "moddable",
+    "projectType": "rocky",
     "sdkVersion": "3",
     "uuid": "00ded3ec-8b6e-45b5-8a50-a170e4000467",
     "enableMultiJS": true,
     "watchapp": {
       "watchface": true
     },
-    "messageKeys": [
-      "dummy"
-    ],
     "targetPlatforms": [
+      "basalt",
+      "chalk",
+      "diorite",
       "emery",
       "gabbro"
     ],
