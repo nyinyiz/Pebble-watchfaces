@@ -30,7 +30,32 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 
 ---
 
-## 2. Aurora
+## 2. Dual Time
+
+> Minimalist dual-timezone watchface for world travelers.
+
+<br>
+
+<img src="watchfaces/dual/screenshots/banner-emery.png" alt="Dual Time banner" width="100%">
+
+<br>
+
+### Live on Device
+
+| Pebble Time 2 (Emery) | Pebble Round 2 (Gabbro) |
+| :---: | :---: |
+| <img src="watchfaces/dual/screenshots/emery-digital-final.png" alt="Dual on emery" width="180"> | <img src="watchfaces/dual/screenshots/gabbro-digital-final.png" alt="Dual on gabbro" width="220"> |
+| 200 × 228 px · rectangular | 260 × 260 px · round |
+
+### Features
+- **Dual Timezones** — Track local and secondary time zones simultaneously.
+- **Switchable Modes** — Supports both digital and analog rendering.
+- **Clean Aesthetic** — Minimalist design optimized for maximum readability.
+- **Multi-platform** — Full support for round, rectangular, and B&W Pebble displays.
+
+---
+
+## 3. Aurora
 
 > A premium utility-first watchface with an aurora borealis visual design.
 
@@ -64,6 +89,13 @@ cd watchfaces/matrix
 ~/.local/bin/pebble install --emulator emery
 ```
 
+### Build & Install Dual Time
+```bash
+cd watchfaces/dual
+~/.local/bin/pebble build
+~/.local/bin/pebble install --emulator emery
+```
+
 ### Build & Install Aurora
 ```bash
 cd watchfaces/aurora
@@ -76,6 +108,7 @@ cd watchfaces/aurora
 .
 ├── watchfaces/
 │   ├── aurora/          # Aurora watchface (Native C)
+│   ├── dual/            # Dual Time watchface (Native C)
 │   └── matrix/          # Matrix Digital Rain (Native C)
 └── README.md            # You are here
 ```
