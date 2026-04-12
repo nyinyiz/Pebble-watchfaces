@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildMountainProfile } from '../src/embeddedjs/mountains.mjs';
+import { buildMountainProfile } from '../src/common/mountains.mjs';
 
 test('buildMountainProfile returns null for round displays', () => {
   const profile = buildMountainProfile({

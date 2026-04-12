@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildAnimationState } from '../src/embeddedjs/animation.mjs';
+import { buildAnimationState } from '../src/common/animation.mjs';
 
 test('buildAnimationState maps seconds to a left-to-right sweep on rectangular screens', () => {
   const state = buildAnimationState({

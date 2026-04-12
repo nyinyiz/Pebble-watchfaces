@@ -343,7 +343,7 @@ rocky.on('draw', function(event) {
   var ctx = event.context;
   if (!W) { init(ctx); }
 
-  var now   = event.date || new Date();
+  var now   = new Date();
   var small = (W <= 180);
 
   applyThemeForHour(now.getHours());
@@ -387,7 +387,6 @@ rocky.on('draw', function(event) {
   drawSecondSweep(ctx, anim);
 
   // 6. Time (measure width so meridiem can be appended to the right)
-  ctx.textBaseline = 'top';
   ctx.textAlign    = 'left';
   ctx.font         = timeFont;
   var tw    = ctx.measureText(timeText).width;
