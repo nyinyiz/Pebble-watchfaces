@@ -1,7 +1,7 @@
 # Aurora
 
 > Premium utility-first Pebble watchface — aurora borealis visual design.
-> Targets **emery** (Pebble Time 2, 200×228) and **gabbro** (Pebble Round 2, 260×260).
+> Native Pebble C watchface for `basalt`, `chalk`, `diorite`, `emery`, `flint`, and `gabbro`.
 
 ## Features
 
@@ -18,38 +18,38 @@
 ## Development
 
 ```bash
-# Test pure logic (no SDK needed)
-npm test
+# Test pure logic (no Pebble SDK needed)
+npm run test:native
 
 # Full build
-pebble build
+/Users/nyinyizaw/.local/bin/pebble build
 
 # Install to emulator
-pebble install --emulator emery
-pebble install --emulator gabbro
+/Users/nyinyizaw/.local/bin/pebble install --emulator emery build/aurora.pbw
+/Users/nyinyizaw/.local/bin/pebble install --emulator gabbro build/aurora.pbw
 
 # Useful extras
-pebble screenshot --no-open --emulator emery emery.png
-pebble screenshot --no-open --emulator gabbro gabbro.png
-pebble logs --emulator emery
+/Users/nyinyizaw/.local/bin/pebble screenshot --no-open --emulator emery emery.png
+/Users/nyinyizaw/.local/bin/pebble screenshot --no-open --emulator gabbro gabbro.png
+/Users/nyinyizaw/.local/bin/pebble logs --emulator emery
 ```
 
 ## Source Layout
 
 ```
 src/
-├── common/          Pure JS — format, layout, model, animation (unit-tested)
-├── embeddedjs/      On-device rendering (Moddable XS / Poco)
-├── c/               Pebble app entry point (minimal C wrapper)
-└── pkjs/            Companion phone app
-tests/               Node.js native test runner (12 tests)
+└── c/
+    ├── main.c            Pebble watchface runtime, rendering, event subscriptions
+    ├── aurora_logic.c    Pure C logic for layout profile, theme, labels, animation
+    └── aurora_logic.h
+tests/
+└── aurora_logic_test.c   Host-side native C test harness
 ```
 
 ## Testing
 
-The test suite covers all pure logic without requiring a Pebble SDK:
+The native test harness covers the cross-platform logic without requiring a Pebble SDK:
 
-- `format.test.mjs` — time, date, battery, Bluetooth label formatting
-- `layout.test.mjs` — position maps for round and rectangular screens
-- `model.test.mjs` — watch state → display model aggregation
-- `animation.test.mjs` — second-progress, band phases, sweep position
+- time, date, battery, and Bluetooth label formatting
+- profile mapping for 144×168 / 180×180 / 200×228 / 260×260 layouts
+- second sweep and animation phase derivation

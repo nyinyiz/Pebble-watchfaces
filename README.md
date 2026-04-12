@@ -30,7 +30,7 @@ Aurora surfaces the information you actually glance at — time, date, battery, 
 - **Time-of-day accent colours** — amber at morning, sky blue by day, cool violet at night
 - **Full status row** — battery %, live seconds, Bluetooth state
 - **12 h / 24 h** — auto-detected from watch settings
-- **Both platforms** — Pebble Time 2 (`emery` 200×228) and Pebble Round 2 (`gabbro` 260×260)
+- **Scaled families** — Time / Time Steel (`basalt`), Time Round (`chalk`), Pebble 2 (`diorite`), Pebble 2 Duo (`flint`), Time 2 (`emery`), Round 2 (`gabbro`)
 
 <br>
 
@@ -39,40 +39,34 @@ Aurora surfaces the information you actually glance at — time, date, battery, 
 ```bash
 cd watchfaces/aurora
 
-# Run unit tests (no Pebble SDK required)
-npm test
+# Run native logic tests (no Pebble SDK required)
+npm run test:native
 
 # Build
-pebble build
+/Users/nyinyizaw/.local/bin/pebble build
 
 # Install to emulator
-pebble install --emulator emery
-pebble install --emulator gabbro
+/Users/nyinyizaw/.local/bin/pebble install --emulator emery build/aurora.pbw
+/Users/nyinyizaw/.local/bin/pebble install --emulator gabbro build/aurora.pbw
 ```
 
 <br>
 
 ## Architecture
 
-The codebase is split into two layers so the core logic is fully testable without a Pebble SDK or emulator:
+Aurora now runs as a native Pebble C watchface:
 
 ```
-src/
-├── common/          # Pure JS modules — no Pebble APIs, fully unit-tested
-│   ├── format.mjs       time, date, battery, Bluetooth formatting
-│   ├── layout.mjs       position map for round vs rectangular screens
-│   ├── model.mjs        aggregates watch state into a display model
-│   └── animation.mjs    derives aurora phase, sweep position from seconds
-│
-└── embeddedjs/      # Moddable XS — runs on-device via Poco graphics engine
-    ├── main.js          rendering engine + event handlers
-    └── manifest.json    Moddable module manifest
+src/c/
+├── main.c              Pebble layers, drawing, battery/Bluetooth/tick subscriptions
+├── aurora_logic.c      platform-agnostic C logic
+└── aurora_logic.h
 ```
 
-Tests run with the Node.js native test runner — no extra dependencies:
+Tests run through a small host-native C harness:
 
 ```bash
-npm test   # 12 tests, covers format / layout / model / animation
+npm run test:native
 ```
 
 <br>
@@ -99,11 +93,8 @@ Every second (`secondchange` event) the watchface redraws in this order:
 
 ```
 watchfaces/aurora/
-├── src/common/          shared logic (format, layout, model, animation)
-├── src/embeddedjs/      on-device JS (Moddable / Poco)
-├── src/c/               minimal Pebble C wrapper
-├── src/pkjs/            companion phone app stub
-├── tests/               Node.js unit tests
+├── src/c/               native Pebble implementation
+├── tests/               host-side C logic tests
 ├── screenshots/         store assets (screenshots + banners)
 └── build/               generated — aurora.pbw lives here
 ```
@@ -115,9 +106,9 @@ watchfaces/aurora/
 You need [Pebble SDK v4.9](https://developer.repebble.com/) with the CLI available on your `PATH`.
 
 ```bash
-pebble build                              # produces build/aurora.pbw
-pebble install --emulator emery           # rectangular emulator
-pebble install --emulator gabbro          # round emulator
-pebble screenshot --no-open --emulator emery emery.png
-pebble logs --emulator emery              # stream logs
+/Users/nyinyizaw/.local/bin/pebble build                              # produces build/aurora.pbw
+/Users/nyinyizaw/.local/bin/pebble install --emulator emery build/aurora.pbw
+/Users/nyinyizaw/.local/bin/pebble install --emulator gabbro build/aurora.pbw
+/Users/nyinyizaw/.local/bin/pebble screenshot --no-open --emulator emery emery.png
+/Users/nyinyizaw/.local/bin/pebble logs --emulator emery
 ```
