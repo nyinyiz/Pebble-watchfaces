@@ -1,0 +1,30 @@
+{
+  "name": "matrix-watchface",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Matrix digital rain watchface for Pebble with health and battery stats.",
+  "author": "nyinyiz",
+  "license": "UNLICENSED",
+  "pebble": {
+    "displayName": "Matrix",
+    "sdkVersion": "3",
+    "uuid": "1e12e345-6789-4bc1-9abc-1234567890ab",
+    "watchapp": {
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery",
+      "flint",
+      "gabbro"
+    ],
+    "capabilities": [
+      "health"
+    ],
+    "resources": {
+      "media": []
+    }
+  }
+}
