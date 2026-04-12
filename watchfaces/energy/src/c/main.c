@@ -9,26 +9,35 @@ static EnergyState s_state;
 
 static void timer_callback(void *data) {
     s_state.pulse_anim_frame++;
-    layer_mark_dirty(s_canvas_layer);
-    s_pulse_timer = app_timer_register(50, timer_callback, NULL);
+    if (s_canvas_layer) {
+        layer_mark_dirty(s_canvas_layer);
+    }
+    s_pulse_timer = app_timer_register(100, timer_callback, NULL);
 }
 
 static void reveal_timer_callback(void *data) {
     s_state.show_time = false;
-    layer_mark_dirty(s_canvas_layer);
+    if (s_canvas_layer) {
+        layer_mark_dirty(s_canvas_layer);
+    }
 }
 
 static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Tap detected!");
     s_state.show_time = true;
     energy_logic_update(&s_state);
-    layer_mark_dirty(s_canvas_layer);
+    if (s_canvas_layer) {
+        layer_mark_dirty(s_canvas_layer);
+    }
     if (s_reveal_timer) app_timer_cancel(s_reveal_timer);
     s_reveal_timer = app_timer_register(3000, reveal_timer_callback, NULL);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     energy_logic_update(&s_state);
-    layer_mark_dirty(s_canvas_layer);
+    if (s_canvas_layer) {
+        layer_mark_dirty(s_canvas_layer);
+    }
 }
 
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
@@ -38,6 +47,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 static void main_window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Energy window load");
 
     s_canvas_layer = layer_create(bounds);
     layer_set_update_proc(s_canvas_layer, canvas_update_proc);
@@ -48,7 +58,16 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
+    if (s_pulse_timer) {
+        app_timer_cancel(s_pulse_timer);
+        s_pulse_timer = NULL;
+    }
+    if (s_reveal_timer) {
+        app_timer_cancel(s_reveal_timer);
+        s_reveal_timer = NULL;
+    }
     layer_destroy(s_canvas_layer);
+    s_canvas_layer = NULL;
 }
 
 static void init() {
@@ -62,7 +81,7 @@ static void init() {
 
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     accel_tap_service_subscribe(accel_tap_handler);
-    s_pulse_timer = app_timer_register(50, timer_callback, NULL);
+    s_pulse_timer = app_timer_register(100, timer_callback, NULL);
 }
 
 static void deinit() {

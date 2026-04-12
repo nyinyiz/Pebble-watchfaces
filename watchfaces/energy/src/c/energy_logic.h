@@ -2,10 +2,11 @@
 #include <pebble.h>
 
 typedef struct {
-    float progress; // 0.0 to 1.0
-    bool show_time; // true when tapped/shaken
+    float energy_level; // 1.0 (Full) to 0.0 (Empty)
+    bool show_time;
     char time_str[8];
     int pulse_anim_frame;
+    GColor current_color;
 } EnergyState;
 
 void energy_logic_init();
