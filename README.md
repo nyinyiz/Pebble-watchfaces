@@ -100,15 +100,3 @@ watchfaces/aurora/
 ```
 
 <br>
-
-## Building from Source
-
-You need [Pebble SDK v4.9](https://developer.repebble.com/) with the CLI available on your `PATH`.
-
-```bash
-/Users/nyinyizaw/.local/bin/pebble build                              # produces build/aurora.pbw
-/Users/nyinyizaw/.local/bin/pebble install --emulator emery build/aurora.pbw
-/Users/nyinyizaw/.local/bin/pebble install --emulator gabbro build/aurora.pbw
-/Users/nyinyizaw/.local/bin/pebble screenshot --no-open --emulator emery emery.png
-/Users/nyinyizaw/.local/bin/pebble logs --emulator emery
-```
