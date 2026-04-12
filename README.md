@@ -1,4 +1,36 @@
-# Aurora — Pebble Watchface
+# Pebble Watchfaces Collection
+
+A collection of premium, high-performance native Pebble watchfaces built with the Pebble C SDK.
+
+---
+
+## 1. Matrix Digital Rain
+
+> Experience the iconic movie's visual aesthetic on your wrist.
+
+<br>
+
+<img src="watchfaces/matrix/screenshots/banner_basalt.png" alt="Matrix banner" width="100%">
+
+<br>
+
+### Live on Device
+
+| Pebble Time 2 (Emery) | Pebble Round 2 (Gabbro) |
+| :---: | :---: |
+| <img src="watchfaces/matrix/screenshots/screenshot_emery_live.png" alt="Matrix on emery" width="180"> | <img src="watchfaces/matrix/screenshots/screenshot_gabbro_live.png" alt="Matrix on gabbro" width="220"> |
+| 200 × 228 px · rectangular | 260 × 260 px · round |
+
+### Features
+- **Dynamic Digital Rain** — 10 FPS cascading character animation.
+- **Centered Bold Time** — HH:MM:SS in LECO 32 Bold.
+- **Real-time Stats** — Battery percentage (+/- charging state) and daily step count.
+- **Full Date** — Day of week and date display.
+- **24h Support** — Auto-detects system time format.
+
+---
+
+## 2. Aurora
 
 > A premium utility-first watchface with an aurora borealis visual design.
 
@@ -6,97 +38,44 @@
 
 <img src="watchfaces/aurora/screenshots/banner_emery.png" alt="Aurora banner — emery" width="100%">
 
-<img src="watchfaces/aurora/screenshots/banner_gabbro.png" alt="Aurora banner — gabbro" width="100%">
-
 <br>
 
-### Live on device
+### Live on Device
 
-| Pebble Time 2 &nbsp;·&nbsp; `emery` | Pebble Round 2 &nbsp;·&nbsp; `gabbro` |
+| Pebble Time 2 (Emery) | Pebble Round 2 (Gabbro) |
 | :---: | :---: |
 | <img src="watchfaces/aurora/screenshots/screenshot_emery.png" alt="Aurora on emery" width="180"> | <img src="watchfaces/aurora/screenshots/screenshot_gabbro.png" alt="Aurora on gabbro" width="220"> |
 | 200 × 228 px · rectangular | 260 × 260 px · round |
 
-<br>
+### Features
+- **Animated Aurora** — Three shifting sine-wave bands (violet → teal → green).
+- **Star Field** — Twinkling stars with subtle per-second updates.
+- **Time-of-day Colors** — Dawn, Day, and Night accent themes.
+- **Detailed Status** — Battery bar, seconds pulse, and Bluetooth state.
 
-## What It Does
-
-Aurora surfaces the information you actually glance at — time, date, battery, and connection — inside a layered aurora landscape that shifts with the time of day.
-
-- **Animated aurora** — three sine-wave bands (violet → teal → green) that flow in real time
-- **Star field** with subtle per-second twinkling
-- **Mountain silhouette** with snow caps on rectangular displays
-- **Second-sweep pulse** — an accent line that travels across the divider each minute
-- **Time-of-day accent colours** — amber at morning, sky blue by day, cool violet at night
-- **Full status row** — battery %, live seconds, Bluetooth state
-- **12 h / 24 h** — auto-detected from watch settings
-- **Scaled families** — Time / Time Steel (`basalt`), Time Round (`chalk`), Pebble 2 (`diorite`), Pebble 2 Duo (`flint`), Time 2 (`emery`), Round 2 (`gabbro`)
-
-<br>
+---
 
 ## Quick Start
 
+### Build & Install Matrix
+```bash
+cd watchfaces/matrix
+~/.local/bin/pebble build
+~/.local/bin/pebble install --emulator emery
+```
+
+### Build & Install Aurora
 ```bash
 cd watchfaces/aurora
-
-# Run native logic tests (no Pebble SDK required)
-npm run test:native
-
-# Build
-/Users/nyinyizaw/.local/bin/pebble build
-
-# Install to emulator
-/Users/nyinyizaw/.local/bin/pebble install --emulator emery build/aurora.pbw
-/Users/nyinyizaw/.local/bin/pebble install --emulator gabbro build/aurora.pbw
+~/.local/bin/pebble build
+~/.local/bin/pebble install --emulator emery
 ```
-
-<br>
-
-## Architecture
-
-Aurora now runs as a native Pebble C watchface:
-
-```
-src/c/
-├── main.c              Pebble layers, drawing, battery/Bluetooth/tick subscriptions
-├── aurora_logic.c      platform-agnostic C logic
-└── aurora_logic.h
-```
-
-Tests run through a small host-native C harness:
-
-```bash
-npm run test:native
-```
-
-<br>
-
-## Rendering Pipeline
-
-Every second (`secondchange` event) the watchface redraws in this order:
-
-1. Black background
-2. Star field — twinkling offset cycles every 5 s
-3. Aurora bands × 3 — phases driven by `secondProgress` for fluid motion
-4. Mountain silhouette + snow caps *(rectangular only)*
-5. Accent divider line
-6. Second-sweep pulse along divider
-7. Time — Leco 42 px LCD digits
-8. Meridiem (AM / PM) *(12 h mode only)*
-9. Date — compact uppercase `SUN 12 APR`
-10. Status row — `100%  ·  SEC 34  ·  BT OK`
-11. Battery indicator bar *(top edge, colour-coded)*
-
-<br>
 
 ## Project Structure
-
 ```
-watchfaces/aurora/
-├── src/c/               native Pebble implementation
-├── tests/               host-side C logic tests
-├── screenshots/         store assets (screenshots + banners)
-└── build/               generated — aurora.pbw lives here
+.
+├── watchfaces/
+│   ├── aurora/          # Aurora watchface (Native C)
+│   └── matrix/          # Matrix Digital Rain (Native C)
+└── README.md            # You are here
 ```
-
-<br>
