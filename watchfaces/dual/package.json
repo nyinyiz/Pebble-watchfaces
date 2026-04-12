@@ -3,6 +3,9 @@
   "author": "Aurora Dev",
   "version": "1.0.0",
   "keywords": ["pebble-app"],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
   "pebble": {
     "sdkVersion": "3",
     "displayName": "Dual Time",

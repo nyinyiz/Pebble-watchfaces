@@ -158,6 +158,7 @@ static void menu_select(MenuLayer *ml, MenuIndex *cell_index, void *context) {
 
 // ── Picker window load/unload ──────────────────────────────────────────────
 static void picker_window_load(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Picker window loaded — %d timezones", NUM_TIMEZONES);
   Layer *root   = window_get_root_layer(window);
   GRect  bounds = layer_get_bounds(root);
 
@@ -181,11 +182,27 @@ static void picker_window_unload(Window *window) {
 }
 
 // ── SELECT button → open picker ────────────────────────────────────────────
-static void select_click_handler(ClickRecognizerRef recognizer, void *ctx) {
+static void open_picker(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Opening picker");
   window_stack_push(s_picker_window, true);
 }
 
+static void select_long_handler(ClickRecognizerRef recognizer, void *ctx) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "SELECT long-press fired");
+  open_picker();
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *ctx) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "SELECT single-click fired");
+  open_picker();
+}
+
 static void click_config_provider(void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "click_config_provider called");
+  // Long press on SELECT: 700ms hold → open picker (not intercepted by OS)
+  window_long_click_subscribe(BUTTON_ID_SELECT, 700,
+                               select_long_handler, NULL);
+  // Also try single click as fallback
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
@@ -284,6 +301,7 @@ static void main_window_unload(Window *window) {
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
 static void init(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Dual Time init — %d timezones available", NUM_TIMEZONES);
   // Load persisted timezone index; validate bounds
   if (persist_exists(PREF_KEY_TZ_INDEX)) {
     s_tz_index = persist_read_int(PREF_KEY_TZ_INDEX);
