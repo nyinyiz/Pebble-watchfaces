@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getThemeForHour, getThemeNameForHour } from '../src/embeddedjs/theme.mjs';
+import { getThemeForHour, getThemeNameForHour } from '../src/common/theme.mjs';
 
 test('getThemeNameForHour splits the day into morning, day, evening, and night', () => {
   assert.equal(getThemeNameForHour(5), 'night');
