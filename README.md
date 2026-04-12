@@ -4,7 +4,33 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 
 ---
 
-## 1. Matrix Digital Rain
+## 1. Energy
+
+> Time as energy. A minimalist battery of your day.
+
+<br>
+
+<img src="watchfaces/energy/screenshots/banner_aplite.png" alt="Energy banner" width="100%">
+
+<br>
+
+### Live on Device
+
+| Pebble Time 2 (Emery) | Pebble Round 2 (Gabbro) |
+| :---: | :---: |
+| <img src="watchfaces/energy/screenshots/screenshot_emery.png" alt="Energy on emery" width="180"> | <img src="watchfaces/energy/screenshots/screenshot_gabbro.png" alt="Energy on gabbro" width="220"> |
+| 200 × 228 px · rectangular | 260 × 260 px · round |
+
+### Features
+- **Time as Energy** — A battery icon that drains throughout the day (100% at 00:00, 0% at 23:59).
+- **Minimalist Aesthetic** — High-contrast B&W design with zero numbers or text by default.
+- **Pulsing Animation** — A subtle "alive" pulse effect on the battery shell.
+- **Hidden Reveal** — Shake or tap the watch to briefly reveal the actual digital time.
+- **Modern & Philosophical** — Emphasizes the passage of time as energy rather than digits.
+
+---
+
+## 2. Matrix Digital Rain
 
 > Experience the iconic movie's visual aesthetic on your wrist.
 
@@ -30,7 +56,7 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 
 ---
 
-## 2. Dual Time
+## 3. Dual Time
 
 > Minimalist dual-timezone watchface for world travelers.
 
@@ -55,7 +81,7 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 
 ---
 
-## 3. Aurora
+## 4. Aurora
 
 > A premium utility-first watchface with an aurora borealis visual design.
 
@@ -81,6 +107,13 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 ---
 
 ## Quick Start
+
+### Build & Install Energy
+```bash
+cd watchfaces/energy
+~/.local/bin/pebble build
+~/.local/bin/pebble install --emulator emery
+```
 
 ### Build & Install Matrix
 ```bash
@@ -109,6 +142,7 @@ cd watchfaces/aurora
 ├── watchfaces/
 │   ├── aurora/          # Aurora watchface (Native C)
 │   ├── dual/            # Dual Time watchface (Native C)
+│   ├── energy/          # Energy watchface (Native C)
 │   └── matrix/          # Matrix Digital Rain (Native C)
 └── README.md            # You are here
 ```

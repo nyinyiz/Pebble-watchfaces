@@ -1,0 +1,29 @@
+{
+  "name": "energy-watchface",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimalist Energy watchface for Pebble.",
+  "author": "nyinyiz",
+  "license": "UNLICENSED",
+  "pebble": {
+    "displayName": "Energy",
+    "sdkVersion": "3",
+    "uuid": "2e12e345-6789-4bc1-9abc-1234567890ef",
+    "watchapp": {
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery",
+      "flint",
+      "gabbro"
+    ],
+    "capabilities": [],
+    "resources": {
+      "media": []
+    }
+  }
+}
