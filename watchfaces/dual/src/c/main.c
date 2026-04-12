@@ -54,6 +54,8 @@ typedef struct {
 
 static Window *s_main_window;
 static Layer *s_face_layer;
+static Window *s_picker_window;
+static MenuLayer *s_menu_layer;
 
 static int32_t s_tz_index = 0;
 static FaceStyle s_face_style = FACE_STYLE_DIGITAL;
@@ -198,7 +200,7 @@ static FaceLayout face_layout_for_bounds(GRect bounds) {
         .analog_main_radius = 40,
         .analog_sub_center = GPoint(108, 108),
         .analog_sub_radius = 16,
-        .time_font_key = FONT_KEY_BITHAM_30_BLACK,
+        .time_font_key = FONT_KEY_BITHAM_34_MEDIUM_NUMBERS,
         .label_font_key = FONT_KEY_GOTHIC_14_BOLD,
         .date_font_key = FONT_KEY_GOTHIC_14,
       };
@@ -383,6 +385,99 @@ static void refresh_face(void) {
   }
 }
 
+// ── Timezone / settings picker ──────────────────────────────────────────────
+
+static uint16_t picker_get_num_sections(MenuLayer *ml, void *ctx) {
+  return 2;
+}
+
+static uint16_t picker_get_num_rows(MenuLayer *ml, uint16_t section, void *ctx) {
+  return section == 0 ? 1 : (uint16_t)NUM_TIMEZONES;
+}
+
+static int16_t picker_get_header_height(MenuLayer *ml, uint16_t section, void *ctx) {
+  return MENU_CELL_BASIC_HEADER_HEIGHT;
+}
+
+static void picker_draw_header(GContext *ctx, const Layer *cell_layer,
+                               uint16_t section, void *ctx2) {
+  menu_cell_basic_header_draw(ctx, cell_layer, section == 0 ? "DISPLAY" : "TIMEZONE");
+}
+
+static void picker_draw_row(GContext *ctx, const Layer *cell_layer,
+                            MenuIndex *idx, void *ctx2) {
+  if (idx->section == 0) {
+    const char *mode = s_face_style == FACE_STYLE_DIGITAL ? "Digital" : "Analog";
+    menu_cell_basic_draw(ctx, cell_layer, "Clock Style", mode, NULL);
+  } else {
+    menu_cell_basic_draw(ctx, cell_layer,
+                         TIMEZONES[idx->row].label,
+                         TIMEZONES[idx->row].city, NULL);
+  }
+}
+
+static void picker_select_click(MenuLayer *ml, MenuIndex *idx, void *ctx) {
+  if (idx->section == 0) {
+    s_face_style = (s_face_style == FACE_STYLE_DIGITAL)
+                   ? FACE_STYLE_ANALOG : FACE_STYLE_DIGITAL;
+    persist_write_int(PREF_KEY_STYLE, (int32_t)s_face_style);
+    menu_layer_reload_data(s_menu_layer);
+    vibes_short_pulse();
+    refresh_face();
+  } else {
+    s_tz_index = (int32_t)idx->row;
+    persist_write_int(PREF_KEY_TZ_INDEX, s_tz_index);
+    refresh_face();
+    window_stack_pop(true);
+  }
+}
+
+static void picker_window_load(Window *window) {
+  Layer *root = window_get_root_layer(window);
+  GRect bounds = layer_get_bounds(root);
+
+  s_menu_layer = menu_layer_create(bounds);
+  menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks) {
+    .get_num_sections  = picker_get_num_sections,
+    .get_num_rows      = picker_get_num_rows,
+    .get_header_height = picker_get_header_height,
+    .draw_header       = picker_draw_header,
+    .draw_row          = picker_draw_row,
+    .select_click      = picker_select_click,
+  });
+  menu_layer_set_click_config_onto_window(s_menu_layer, window);
+
+  MenuIndex cur = { .section = 1, .row = (uint16_t)s_tz_index };
+  menu_layer_set_selected_index(s_menu_layer, cur, MenuRowAlignCenter, false);
+
+  layer_add_child(root, menu_layer_get_layer(s_menu_layer));
+}
+
+static void picker_window_unload(Window *window) {
+  menu_layer_destroy(s_menu_layer);
+  s_menu_layer = NULL;
+  window_destroy(s_picker_window);
+  s_picker_window = NULL;
+}
+
+static void open_picker(ClickRecognizerRef rec, void *ctx) {
+  if (s_picker_window) {
+    return;
+  }
+  s_picker_window = window_create();
+  window_set_window_handlers(s_picker_window, (WindowHandlers) {
+    .load   = picker_window_load,
+    .unload = picker_window_unload,
+  });
+  window_stack_push(s_picker_window, true);
+}
+
+static void main_click_config_provider(void *ctx) {
+  window_long_click_subscribe(BUTTON_ID_UP, 700, open_picker, NULL);
+}
+
+// ── Periodic handlers ────────────────────────────────────────────────────────
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   refresh_face();
 }
@@ -409,6 +504,8 @@ static void main_window_load(Window *window) {
   s_face_layer = layer_create(bounds);
   layer_set_update_proc(s_face_layer, face_layer_update_proc);
   layer_add_child(root, s_face_layer);
+
+  window_set_click_config_provider(window, main_click_config_provider);
 }
 
 static void main_window_unload(Window *window) {
