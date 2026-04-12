@@ -107,8 +107,7 @@ static void update_display(struct tm *local_tm, time_t utc_now) {
   // Other timezone time: add offset to UTC, render with gmtime_r
   int16_t off_min = TIMEZONES[s_tz_index].offset;
   time_t  other_t = utc_now + ((time_t)off_min * 60);
-  struct tm other_tm;
-  gmtime_r(&other_t, &other_tm);
+  struct tm other_tm = *gmtime(&other_t);  // copy out of static buffer
   strftime(s_other_time_buf, sizeof(s_other_time_buf),
            is_24h ? "%H:%M" : "%I:%M", &other_tm);
   text_layer_set_text(s_other_time_layer, s_other_time_buf);
