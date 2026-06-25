@@ -6,7 +6,7 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 
 ## 1. Energy
 
-> Time as energy. A minimalist battery of your day.
+> Time as energy. A segmented meter that drains throughout your day.
 
 <br>
 
@@ -22,11 +22,12 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 | 200 × 228 px · rectangular | 260 × 260 px · round |
 
 ### Features
-- **Time as Energy** — A battery icon that drains throughout the day (100% at 00:00, 0% at 23:59).
-- **Minimalist Aesthetic** — High-contrast B&W design with zero numbers or text by default.
-- **Pulsing Animation** — A subtle "alive" pulse effect on the battery shell.
-- **Hidden Reveal** — Shake or tap the watch to briefly reveal the actual digital time.
-- **Modern & Philosophical** — Emphasizes the passage of time as energy rather than digits.
+- **Segmented Energy Meter** — 8 color-coded blocks (green/yellow/red) that empty throughout your day.
+- **Configurable Schedule** — Set custom wake/sleep hours via phone config, or pick a preset (Early Bird, Standard, Night Owl).
+- **Always-Visible Time** — Subtle clock below the pillar, always readable at a glance.
+- **Tap-to-Reveal** — Shake to see energy %, date, and watch battery for 3 seconds.
+- **Breathing Pulse** — Topmost segment gently pulses to feel alive; pauses when screen is off.
+- **Night Owl Support** — Schedules that cross midnight work correctly.
 
 ---
 
