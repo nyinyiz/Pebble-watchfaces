@@ -6,6 +6,7 @@ static Layer *s_canvas_layer;
 static TextLayer *s_time_layer;
 static AppTimer *s_timer;
 static MatrixStats s_stats;
+static bool s_animating = false;
 
 static void update_time() {
     time_t temp = time(NULL);
@@ -38,10 +39,38 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     }
 }
 
+static void start_animation();
+
 static void timer_callback(void *data) {
+    s_timer = NULL;
+    if (!s_animating) return;
     matrix_logic_update();
     layer_mark_dirty(s_canvas_layer);
     s_timer = app_timer_register(100, timer_callback, NULL);
+}
+
+static void start_animation() {
+    if (s_animating) return;
+    s_animating = true;
+    if (!s_timer) {
+        s_timer = app_timer_register(100, timer_callback, NULL);
+    }
+}
+
+static void stop_animation() {
+    s_animating = false;
+    if (s_timer) {
+        app_timer_cancel(s_timer);
+        s_timer = NULL;
+    }
+}
+
+static void focus_handler(bool in_focus) {
+    if (in_focus) {
+        start_animation();
+    } else {
+        stop_animation();
+    }
 }
 
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
@@ -90,14 +119,17 @@ static void init() {
 
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
     battery_state_service_subscribe(update_battery);
-    
-    s_timer = app_timer_register(100, timer_callback, NULL);
+    app_focus_service_subscribe(focus_handler);
+
+    start_animation();
 }
 
 static void deinit() {
-    window_destroy(s_main_window);
+    stop_animation();
+    app_focus_service_unsubscribe();
     battery_state_service_unsubscribe();
     tick_timer_service_unsubscribe();
+    window_destroy(s_main_window);
 }
 
 int main(void) {

@@ -3,9 +3,11 @@
 
 static MatrixDrop drops[NUM_DROPS];
 static GRect s_bounds;
+static GFont s_font;
 
 void matrix_logic_init(GRect bounds) {
     s_bounds = bounds;
+    s_font = fonts_get_system_font(FONT_KEY_GOTHIC_14);
     for (int i = 0; i < NUM_DROPS; i++) {
         drops[i].x = (i * COLUMN_WIDTH) % bounds.size.w;
         drops[i].y = -(rand() % 100);
@@ -32,7 +34,7 @@ void matrix_logic_draw(GContext *ctx, MatrixStats *stats) {
             char c = '0' + (rand() % 10);
             char str[2] = {c, 0};
             GRect rect = GRect(drops[i].x, drops[i].y - (j * FONT_HEIGHT), COLUMN_WIDTH, FONT_HEIGHT);
-            graphics_draw_text(ctx, str, fonts_get_system_font(FONT_KEY_GOTHIC_14), rect, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+            graphics_draw_text(ctx, str, s_font, rect, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
         }
     }
 
@@ -46,8 +48,8 @@ void matrix_logic_draw(GContext *ctx, MatrixStats *stats) {
     char stats_buffer[64];
     snprintf(stats_buffer, sizeof(stats_buffer), "BAT: %d%% %s | STEPS: %d", stats->battery_percent, stats->is_charging ? "+" : "-", stats->step_count);
     
-    graphics_draw_text(ctx, stats->date_str, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(0, s_bounds.size.h - 38, s_bounds.size.w, 18), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, stats_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(0, s_bounds.size.h - 22, s_bounds.size.w, 18), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, stats->date_str, s_font, GRect(0, s_bounds.size.h - 38, s_bounds.size.w, 18), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, stats_buffer, s_font, GRect(0, s_bounds.size.h - 22, s_bounds.size.w, 18), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void matrix_logic_deinit() {}
