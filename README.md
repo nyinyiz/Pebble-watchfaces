@@ -10,7 +10,7 @@ A collection of premium, high-performance native Pebble watchfaces built with th
 
 <br>
 
-<img src="watchfaces/energy/screenshots/banner_aplite.png" alt="Energy banner" width="100%">
+<img src="watchfaces/energy/screenshots/banner_energy.png" alt="Energy banner" width="100%">
 
 <br>
 
