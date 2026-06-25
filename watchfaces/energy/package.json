@@ -1,10 +1,13 @@
 {
   "name": "energy-watchface",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Minimalist Energy watchface for Pebble.",
+  "description": "Segmented energy meter watchface with configurable schedule.",
   "author": "nyinyiz",
   "license": "UNLICENSED",
+  "scripts": {
+    "test:native": "cc -o tests/energy_logic_test tests/energy_logic_test.c -lm && ./tests/energy_logic_test"
+  },
   "pebble": {
     "displayName": "Energy",
     "sdkVersion": "3",
@@ -12,6 +15,11 @@
     "watchapp": {
       "watchface": true
     },
+    "enableMultiJS": true,
+    "messageKeys": [
+      "wake_hour",
+      "sleep_hour"
+    ],
     "targetPlatforms": [
       "aplite",
       "basalt",
